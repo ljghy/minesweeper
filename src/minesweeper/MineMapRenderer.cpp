@@ -48,21 +48,7 @@ void MineMapRenderer::create(MineMap &mineMap)
     FrameBufferCreateInfo fboInfo{800, 600};
     m_FBO.create(fboInfo);
 
-    m_texList[0] = &ResourceManager::getTexture("covered_tex");
-    m_texList[1] = &ResourceManager::getTexture("covered_flagged_tex");
-    m_texList[2] = &ResourceManager::getTexture("covered_undetermined_tex");
-    m_texList[3] = &ResourceManager::getTexture("covered_highlighted_tex");
-
-    m_texList[4] = &ResourceManager::getTexture("uncovered_0_tex");
-    m_texList[5] = &ResourceManager::getTexture("uncovered_1_tex");
-    m_texList[6] = &ResourceManager::getTexture("uncovered_2_tex");
-    m_texList[7] = &ResourceManager::getTexture("uncovered_3_tex");
-    m_texList[8] = &ResourceManager::getTexture("uncovered_4_tex");
-    m_texList[9] = &ResourceManager::getTexture("uncovered_5_tex");
-    m_texList[10] = &ResourceManager::getTexture("uncovered_6_tex");
-    m_texList[11] = &ResourceManager::getTexture("uncovered_7_tex");
-    m_texList[12] = &ResourceManager::getTexture("uncovered_8_tex");
-    m_texList[13] = &ResourceManager::getTexture("uncovered_boom_tex");
+    m_mineMapTex = &ResourceManager::getTexture("mine_map_tex");
 }
 
 glm::vec4 MineMapRenderer::render(uint16_t viewportWidth, uint16_t viewportHeight)
@@ -117,11 +103,8 @@ glm::vec4 MineMapRenderer::render(uint16_t viewportWidth, uint16_t viewportHeigh
     m_pShader->use();
     m_pShader->setUniform4fv("view", view);
 
-    for (uint8_t i = 0; i < 14; ++i)
-    {
-        m_texList[i]->bind(i);
-        m_pShader->setUniform1i(("tex[" + std::to_string(i) + "]").c_str(), i);
-    }
+    m_mineMapTex->bind(0);
+    m_pShader->setUniform1i("tex", 0);
 
     glDrawArrays(GL_TRIANGLES, 0, 6 * mw * mh);
 

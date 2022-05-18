@@ -7,13 +7,11 @@ layout (location = 1) in float aTexId;
 uniform vec4 view;
 
 out vec2 texCoords;
-out float texId;
 
 void main()
 {
     gl_Position = vec4(aPosuv.xy * view.xy + view.zw, 0.0, 1.0); 
-    texCoords = aPosuv.zw;
-    texId = aTexId;
+    texCoords = vec2(aPosuv.z, (aPosuv.w + aTexId) / 14.0);
 }
 
 #shader fragment
@@ -22,11 +20,10 @@ void main()
 out vec4 FragColor;
 
 in vec2 texCoords;
-in float texId;
 
-uniform sampler2D tex[14];
+uniform sampler2D tex;
 
 void main()
 { 
-    FragColor = texture(tex[int(texId)], texCoords);
+    FragColor = texture(tex, texCoords);
 }

@@ -19,7 +19,7 @@ private:
     uint16_t m_viewportWidth;
     uint16_t m_viewportHeight;
 
-    std::array<Texture2D *, 16> m_texList;
+    Texture2D *m_mineMapTex;
 
 public:
     MineMapRenderer() = default;

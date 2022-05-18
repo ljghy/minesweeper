@@ -12,21 +12,7 @@ void Minesweeper::init(int argc, char *argv[])
 {
     ResourceManager::loadShaderFromFile("../res/shaders/mine_map.shader", "mine_map_shader");
 
-    ResourceManager::loadTextureFromFile("../res/textures/mine_map_covered.png", "covered_tex");
-    ResourceManager::loadTextureFromFile("../res/textures/mine_map_covered_flagged.png", "covered_flagged_tex");
-    ResourceManager::loadTextureFromFile("../res/textures/mine_map_covered_undetermined.png", "covered_undetermined_tex");
-    ResourceManager::loadTextureFromFile("../res/textures/mine_map_covered_highlighted.png", "covered_highlighted_tex");
-
-    ResourceManager::loadTextureFromFile("../res/textures/mine_map_uncovered_0.png", "uncovered_0_tex");
-    ResourceManager::loadTextureFromFile("../res/textures/mine_map_uncovered_1.png", "uncovered_1_tex");
-    ResourceManager::loadTextureFromFile("../res/textures/mine_map_uncovered_2.png", "uncovered_2_tex");
-    ResourceManager::loadTextureFromFile("../res/textures/mine_map_uncovered_3.png", "uncovered_3_tex");
-    ResourceManager::loadTextureFromFile("../res/textures/mine_map_uncovered_4.png", "uncovered_4_tex");
-    ResourceManager::loadTextureFromFile("../res/textures/mine_map_uncovered_5.png", "uncovered_5_tex");
-    ResourceManager::loadTextureFromFile("../res/textures/mine_map_uncovered_6.png", "uncovered_6_tex");
-    ResourceManager::loadTextureFromFile("../res/textures/mine_map_uncovered_7.png", "uncovered_7_tex");
-    ResourceManager::loadTextureFromFile("../res/textures/mine_map_uncovered_8.png", "uncovered_8_tex");
-    ResourceManager::loadTextureFromFile("../res/textures/mine_map_uncovered_boom.png", "uncovered_boom_tex");
+    ResourceManager::loadTextureFromFile("../res/textures/mine_map_tex.png", "mine_map_tex");
 
     m_mineMap.init(16, 16, 40);
     m_mineMapRenderer.create(m_mineMap);
