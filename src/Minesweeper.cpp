@@ -18,7 +18,7 @@ void Minesweeper::init(int argc, char *argv[])
 
     m_mineMap.init(m_difficulty.width, m_difficulty.height, m_difficulty.mineCount);
     m_mineMapRenderer.create(m_mineMap);
-    m_state = GAME_PLAYING;
+    m_state = GAME_IDLE;
 }
 
 void Minesweeper::showMenuBar()
@@ -43,63 +43,37 @@ void Minesweeper::showMenuBar()
     }
 }
 
-void Minesweeper::showWinWindow(const ImVec2 &center)
+void Minesweeper::showStatistics()
 {
-    auto io = ImGui::GetIO();
-    ImGui::SetNextWindowPos(center, ImGuiCond_Once, ImVec2(0.5f, 0.5f));
-    ImGui::Begin("Minesweeper", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
-    ImGui::SetWindowFocus("Minesweeper");
-
-    ImGui::Text("You Win!");
-
-    ImGui::Separator();
-
     if (ImGui::BeginTable("Statistics", 2))
     {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
+        ImGui::Text("Mode");
         ImGui::Text("Time");
+
         ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%.3f", 0.f);
+        ImGui::Text("%s", difficultyStr[m_difficulty.difficulty]);
+        ImGui::Text("%.3fs", m_timer.record());
         ImGui::EndTable();
     }
-
-    ImGui::Separator();
-
-    if (ImGui::Button("New game"))
-    {
-        m_state = GAME_INIT;
-        ImGui::SetWindowFocus("Viewport");
-    }
-
-    ImGui::SameLine();
-    if (ImGui::Button("Quit"))
-        m_state = GAME_QUIT;
-
-    ImGui::End();
 }
 
-void Minesweeper::showLoseWindow(const ImVec2 &center)
+void Minesweeper::showFinishWindow(const ImVec2 &center)
 {
     auto io = ImGui::GetIO();
     ImGui::SetNextWindowPos(center, ImGuiCond_Once, ImVec2(0.5f, 0.5f));
-
     ImGui::Begin("Minesweeper", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
     ImGui::SetWindowFocus("Minesweeper");
 
-    ImGui::Text("You Lose!");
+    if (m_state == GAME_WIN)
+        ImGui::Text("You Win!");
+    else
+        ImGui::Text("You Lose!");
 
     ImGui::Separator();
 
-    if (ImGui::BeginTable("Statistics", 2))
-    {
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::Text("Time");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%.3f", 0.f);
-        ImGui::EndTable();
-    }
+    showStatistics();
 
     ImGui::Separator();
 
@@ -131,7 +105,12 @@ void Minesweeper::renderGui()
                      ImGuiWindowFlags_NoDocking);
 
     showMenuBar();
+
+    ImGui::Text("%.3fs", m_timer.query());
+    ImGui::Separator();
+
     {
+
         ImGui::BeginChild("Minemap");
         ImVec2 windowSize = ImGui::GetWindowSize();
         glm::vec4 transform = m_mineMapRenderer.render(static_cast<uint16_t>(windowSize.x + 0.5f), static_cast<uint16_t>(windowSize.y + 0.5f));
@@ -150,10 +129,8 @@ void Minesweeper::renderGui()
     ImGui::End();
     ImGui::PopStyleVar();
 
-    if (m_state == GAME_WIN)
-        showWinWindow(center);
-    else if (m_state == GAME_LOSE)
-        showLoseWindow(center);
+    if (m_state == GAME_WIN || m_state == GAME_LOSE)
+        showFinishWindow(center);
 }
 
 Operation Minesweeper::getOperation()
@@ -165,6 +142,12 @@ Operation Minesweeper::getOperation()
          ld = ImGui::IsMouseDown(0), rd = ImGui::IsMouseDown(1), wd = ImGui::IsMouseDown(2),
          lr = ImGui::IsMouseReleased(0), rr = ImGui::IsMouseReleased(1), wr = ImGui::IsMouseReleased(2);
 
+    static bool leftClickedOnly = false;
+    if (lc)
+        leftClickedOnly = true;
+    if (rc || wc || rd || wd || rr || wr)
+        leftClickedOnly = false;
+
     if (wr || (lr && rr) || (lr && rd) || (rr && ld))
         return UNCOVER_BATCH;
 
@@ -174,11 +157,6 @@ Operation Minesweeper::getOperation()
     if (rc && !(ld || wd))
         return MARK_BLOCK;
 
-    static bool leftClickedOnly = false;
-    if (lc)
-        leftClickedOnly = true;
-    if (rc || wc)
-        leftClickedOnly = false;
     if (leftClickedOnly && lr)
         return UNCOVER_SINGLE;
 
@@ -187,29 +165,37 @@ Operation Minesweeper::getOperation()
 
 void Minesweeper::update()
 {
-    if (m_state == GAME_PLAYING)
+    if (m_state == GAME_PLAYING || m_state == GAME_IDLE)
     {
-        m_mineMap.update(m_mineMapMouseY, m_mineMapMouseX, getOperation());
-        auto gs = m_mineMap.getGameState();
+        if (m_mineMapMouseX >= 0 && m_mineMapMouseX < m_mineMap.getWidth() && m_mineMapMouseY >= 0 && m_mineMapMouseY < m_mineMap.getHeight())
+        {
+            auto oprt = getOperation();
+            if (m_state == GAME_IDLE && oprt == UNCOVER_SINGLE)
+            {
+                m_timer.start();
+                m_mineMap.init(m_difficulty.width, m_difficulty.height, m_difficulty.mineCount, m_mineMapMouseX, m_mineMapMouseY);
+                m_state = GAME_PLAYING;
+            }
+            m_mineMap.update(m_mineMapMouseY, m_mineMapMouseX, oprt);
+            auto gs = m_mineMap.getGameState();
 
-        if (gs.state == GameState::CONTINUE)
-        {
-            m_state = GAME_PLAYING;
-        }
-        else if (gs.state == GameState::LOSE)
-        {
-            m_state = GAME_LOSE;
-        }
-        else // if(gs.state == GameState::WIN)
-        {
-            m_state = GAME_WIN;
+            if (gs.state == GameState::LOSE)
+            {
+                m_state = GAME_LOSE;
+                m_timer.stop();
+            }
+            else if (gs.state == GameState::WIN)
+            {
+                m_state = GAME_WIN;
+                m_timer.stop();
+            }
         }
     }
     else if (m_state == GAME_INIT)
     {
         m_mineMap.init(m_difficulty.width, m_difficulty.height, m_difficulty.mineCount);
         m_mineMapRenderer.create(m_mineMap);
-        m_state = GAME_PLAYING;
+        m_state = GAME_IDLE;
     }
 }
 

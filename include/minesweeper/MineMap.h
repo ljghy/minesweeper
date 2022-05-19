@@ -75,7 +75,7 @@ private:
 
 public:
     MineMap();
-    void init(uint16_t width, uint16_t height, uint16_t mineCount, int32_t seed = -1);
+    void init(uint16_t width, uint16_t height, uint16_t mineCount, int16_t excludeX = -1, int16_t excludeY = -1, int32_t seed = -1);
     void update(uint16_t row, uint16_t col, Operation oprt);
     GameState getGameState() const;
     BlockInfo getBlockInfo(uint16_t row, uint16_t col) const;

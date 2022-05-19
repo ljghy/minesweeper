@@ -3,16 +3,24 @@
 
 #include <minesweeper/MineMap.h>
 #include <minesweeper/MineMapRenderer.h>
+#include <utils/Timer.hpp>
 
 namespace minesweeper
 {
 enum Difficulty
 {
-    EASY,
-    NORMAL,
-    HARD,
-    CUSTOM
+    EASY = 0,
+    NORMAL = 1,
+    HARD = 2,
+    CUSTOM = 3
 };
+
+inline const char *difficultyStr[]{
+    "Easy",
+    "Normal",
+    "Hard",
+    "Custom"};
+
 struct DifficultySelection
 {
     Difficulty difficulty;
@@ -61,11 +69,12 @@ private:
     bool uncoverWhenRelease;
 
     DifficultySelection m_difficulty;
+    Timer m_timer;
 
     enum
     {
         GAME_INIT,
-        GAME_STARTED,
+        GAME_IDLE,
         GAME_PLAYING,
         GAME_WIN,
         GAME_LOSE,
@@ -73,8 +82,8 @@ private:
     } m_state;
 
     void showMenuBar();
-    void showWinWindow(const ImVec2& center);
-    void showLoseWindow(const ImVec2& center);
+    void showStatistics();
+    void showFinishWindow(const ImVec2 &center);
     Operation getOperation();
 
 public:

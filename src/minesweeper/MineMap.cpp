@@ -16,7 +16,7 @@ MineMap::MineMap()
 {
 }
 
-void MineMap::init(uint16_t width, uint16_t height, uint16_t mineCount, int32_t seed)
+void MineMap::init(uint16_t width, uint16_t height, uint16_t mineCount, int16_t excludeX, int16_t excludeY, int32_t seed)
 {
     m_width = width;
     m_height = height;
@@ -35,6 +35,8 @@ void MineMap::init(uint16_t width, uint16_t height, uint16_t mineCount, int32_t 
         m_seed = static_cast<uint32_t>(seed);
     srand(m_seed);
 
+    if (excludeX >= 0 && excludeX < width && excludeY >= 0 && excludeY < height)
+        m_mineMap[excludeY][excludeX].isMine = true;
     mineCount = 0;
     while (mineCount < m_mineCount)
     {
@@ -51,6 +53,8 @@ void MineMap::init(uint16_t width, uint16_t height, uint16_t mineCount, int32_t 
             ++mineCount;
         }
     }
+    if (excludeX >= 0 && excludeX < width && excludeY >= 0 && excludeY < height)
+        m_mineMap[excludeY][excludeX].isMine = false;
 }
 
 void MineMap::unhighlight()
