@@ -40,7 +40,8 @@ void ResourceManager::loadShaderFromFile(const std::string &filename,
 }
 
 void ResourceManager::loadTextureFromFile(const std::string &filename,
-                                          const std::string &name)
+                                          const std::string &name,
+                                          GLenum filterMode)
 {
     Texture2DCreateInfo createInfo;
     int channels;
@@ -49,17 +50,16 @@ void ResourceManager::loadTextureFromFile(const std::string &filename,
                               &createInfo.height,
                               &channels, 4);
     assert(data != nullptr);
-    assert(channels == 4);
 
     createInfo.internalFmt = GL_RGBA;
     createInfo.dataType = GL_UNSIGNED_BYTE;
     createInfo.data = data;
-    createInfo.dataFmt = GL_RGBA;
+    createInfo.dataFmt = createInfo.internalFmt;
     createInfo.mipmapLevel = 0;
     createInfo.genMipmap = true;
 
     createInfo.wrapMode = GL_REPEAT;
-    createInfo.filterMode = GL_NEAREST;
+    createInfo.filterMode = filterMode;
 
     auto p = m_textures.insert(std::make_pair(name, Texture2D()));
     assert(p.second);

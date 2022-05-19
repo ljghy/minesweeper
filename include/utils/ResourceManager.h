@@ -12,7 +12,7 @@ private:
 
 public:
     static void loadShaderFromFile(const std::string &filename, const std::string &name);
-    static void loadTextureFromFile(const std::string &filename, const std::string &name);
+    static void loadTextureFromFile(const std::string &filename, const std::string &name, GLenum filterMode = GL_LINEAR);
 
     static Shader &getShader(const std::string &name);
     static Texture2D &getTexture(const std::string &name);

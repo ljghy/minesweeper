@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 #endif
 
     // Create window with graphics context
-    GLFWwindow *window = glfwCreateWindow(1280, 720, "Minesweeper", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(640, 480, "Minesweeper", NULL, NULL);
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);
@@ -116,6 +116,7 @@ int main(int argc, char **argv)
 
     // ImFont *font = io.Fonts->AddFontFromFileTTF("../res/imgui_fonts/arial.ttf", 14.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
 
+    io.IniFilename = nullptr;
     // Our state
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     minesweeper::Minesweeper game;
@@ -131,7 +132,6 @@ int main(int argc, char **argv)
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
 
-
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -141,7 +141,6 @@ int main(int argc, char **argv)
 
         // Rendering
         ImGui::Render();
-        game.update();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
@@ -161,6 +160,9 @@ int main(int argc, char **argv)
         }
 
         glfwSwapBuffers(window);
+        if (game.shouldQuit())
+            break;
+        game.update();
     }
 
     game.terminate();

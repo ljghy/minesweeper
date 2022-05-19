@@ -35,6 +35,7 @@ public:
     unsigned int getElementCount() const { return static_cast<unsigned int>(m_elements.size()); }
     unsigned int getStride() const { return m_stride; }
 
+
     unsigned int getType(size_t i) const { return m_elements[i].first; }
     unsigned int getCount(size_t i) const { return m_elements[i].second; }
 

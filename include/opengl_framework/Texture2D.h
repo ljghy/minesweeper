@@ -39,6 +39,9 @@ public:
     void bind(unsigned int unit = 0) const;
     void unbind() const;
 
+    int width() const { return m_info.width; }
+    int height() const { return m_info.height; }
+
     inline unsigned int id() const { return m_id; }
 };
 

@@ -45,18 +45,34 @@ void MineMapRenderer::create(MineMap &mineMap)
 
     m_pShader = &ResourceManager::getShader("mine_map_shader");
 
-    FrameBufferCreateInfo fboInfo{800, 600};
+    FrameBufferCreateInfo fboInfo{m_viewportWidth, m_viewportHeight};
     m_FBO.create(fboInfo);
 
     m_mineMapTex = &ResourceManager::getTexture("mine_map_tex");
+
+    float quadVert[]{
+        -1.f, -1.f, 0.f, 0.f,
+        1.f, 1.f, 1.f, 1.f,
+        1.f, -1.f, 1.f, 0.f,
+        -1.f, -1.f, 0.f, 0.f,
+        -1.f, 1.f, 0.f, 1.f,
+        1.f, 1.f, 1.f, 1.f};
+    m_bkVBO.create(quadVert, sizeof(quadVert), GL_STATIC_DRAW);
+    m_bkVAO.create();
+    VertexBufferLayout bkLayout;
+    bkLayout.push(GL_FLOAT, 4);
+    m_bkVAO.addBuffer(m_bkVBO, bkLayout);
+
+    m_pBkShader = &ResourceManager::getShader("background_shader");
+    m_bkTex = &ResourceManager::getTexture("background_tex");
 }
 
 glm::vec4 MineMapRenderer::render(uint16_t viewportWidth, uint16_t viewportHeight)
 {
+    uint16_t mw = m_pMineMap->getWidth(), mh = m_pMineMap->getHeight();
     m_VBO.bind();
     void *ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
-    uint16_t mw = m_pMineMap->getWidth(), mh = m_pMineMap->getHeight();
     for (uint16_t r = 0; r < mh; ++r)
         for (uint16_t c = 0; c < mw; ++c)
         {
@@ -78,8 +94,39 @@ glm::vec4 MineMapRenderer::render(uint16_t viewportWidth, uint16_t viewportHeigh
 
     auto &w = viewportWidth;
     auto &h = viewportHeight;
+    glm::vec4 view(1.f, 1.f, 0.f, 0.f);
+
+    m_FBO.bind();
+    glViewport(0, 0, w, h);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // Render background
+
+    int tw = m_bkTex->width(), th = m_bkTex->height();
+    if (w * th - h * tw > 0)
+    {
+        view.y = static_cast<float>(h) / th * tw / w;
+        view.w = 0.5f * (1.f - view.y);
+    }
+    else
+    {
+        view.x = static_cast<float>(w) / tw * th / h;
+        view.z = 0.5f * (1.f - view.x);
+    }
+
+    m_bkVAO.bind();
+    m_pBkShader->use();
+    m_bkTex->bind(0);
+    m_pBkShader->setUniform1i("tex", 0);
+    m_pBkShader->setUniform4fv("view", view);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    // Render mine map
+
     float iaspect = static_cast<float>(h) / static_cast<float>(w);
-    glm::vec4 view;
     if (w * mh - h * mw > 0)
     {
         view.x = 2.f / mw * iaspect;
@@ -95,14 +142,9 @@ glm::vec4 MineMapRenderer::render(uint16_t viewportWidth, uint16_t viewportHeigh
         view.w = -1.f / iaspect;
     }
 
-    m_FBO.bind();
-    glViewport(0, 0, m_viewportWidth, m_viewportHeight);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
     m_VAO.bind();
     m_pShader->use();
     m_pShader->setUniform4fv("view", view);
-
     m_mineMapTex->bind(0);
     m_pShader->setUniform1i("tex", 0);
 

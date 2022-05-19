@@ -11,11 +11,14 @@ namespace minesweeper
 void Minesweeper::init(int argc, char *argv[])
 {
     ResourceManager::loadShaderFromFile("../res/shaders/mine_map.shader", "mine_map_shader");
+    ResourceManager::loadTextureFromFile("../res/textures/mine_map_tex_blue_alpha.png", "mine_map_tex", GL_NEAREST);
 
-    ResourceManager::loadTextureFromFile("../res/textures/mine_map_tex.png", "mine_map_tex");
+    ResourceManager::loadShaderFromFile("../res/shaders/background.shader", "background_shader");
+    ResourceManager::loadTextureFromFile("../res/textures/background_tex.png", "background_tex");
 
-    m_mineMap.init(16, 16, 40);
+    m_mineMap.init(m_difficulty.width, m_difficulty.height, m_difficulty.mineCount);
     m_mineMapRenderer.create(m_mineMap);
+    m_state = GAME_PLAYING;
 }
 
 void Minesweeper::showMenuBar()
@@ -40,26 +43,99 @@ void Minesweeper::showMenuBar()
     }
 }
 
+void Minesweeper::showWinWindow(const ImVec2 &center)
+{
+    auto io = ImGui::GetIO();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Once, ImVec2(0.5f, 0.5f));
+    ImGui::Begin("Minesweeper", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
+    ImGui::SetWindowFocus("Minesweeper");
+
+    ImGui::Text("You Win!");
+
+    ImGui::Separator();
+
+    if (ImGui::BeginTable("Statistics", 2))
+    {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::Text("Time");
+        ImGui::TableSetColumnIndex(1);
+        ImGui::Text("%.3f", 0.f);
+        ImGui::EndTable();
+    }
+
+    ImGui::Separator();
+
+    if (ImGui::Button("New game"))
+    {
+        m_state = GAME_INIT;
+        ImGui::SetWindowFocus("Viewport");
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Quit"))
+        m_state = GAME_QUIT;
+
+    ImGui::End();
+}
+
+void Minesweeper::showLoseWindow(const ImVec2 &center)
+{
+    auto io = ImGui::GetIO();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Once, ImVec2(0.5f, 0.5f));
+
+    ImGui::Begin("Minesweeper", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
+    ImGui::SetWindowFocus("Minesweeper");
+
+    ImGui::Text("You Lose!");
+
+    ImGui::Separator();
+
+    if (ImGui::BeginTable("Statistics", 2))
+    {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::Text("Time");
+        ImGui::TableSetColumnIndex(1);
+        ImGui::Text("%.3f", 0.f);
+        ImGui::EndTable();
+    }
+
+    ImGui::Separator();
+
+    if (ImGui::Button("New game"))
+    {
+        m_state = GAME_INIT;
+        ImGui::SetWindowFocus("Viewport");
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Quit"))
+        m_state = GAME_QUIT;
+
+    ImGui::End();
+}
+
 void Minesweeper::renderGui()
 {
-
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->Pos);
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-    ImGui::Begin("viewport", nullptr,
+    ImGui::Begin("Viewport", nullptr,
                  ImGuiWindowFlags_NoDecoration |
                      ImGuiWindowFlags_NoResize |
                      ImGuiWindowFlags_NoTitleBar |
                      ImGuiWindowFlags_NoScrollbar |
-                     ImGuiWindowFlags_MenuBar);
+                     ImGuiWindowFlags_MenuBar |
+                     ImGuiWindowFlags_NoDocking);
 
     showMenuBar();
     {
-        ImGui::BeginChild("minemap");
+        ImGui::BeginChild("Minemap");
         ImVec2 windowSize = ImGui::GetWindowSize();
         glm::vec4 transform = m_mineMapRenderer.render(static_cast<uint16_t>(windowSize.x + 0.5f), static_cast<uint16_t>(windowSize.y + 0.5f));
-        ImGui::Image((ImTextureID)m_mineMapRenderer.tex(), windowSize, ImVec2(0, 0), ImVec2(1, 1));
+        ImGui::Image(reinterpret_cast<ImTextureID>(m_mineMapRenderer.tex()), windowSize, ImVec2(0, 0), ImVec2(1, 1));
 
         ImVec2 windowPos = ImGui::GetWindowPos();
         ImVec2 mousePos = ImGui::GetMousePos();
@@ -67,8 +143,17 @@ void Minesweeper::renderGui()
         m_mineMapMouseY = static_cast<int16_t>(glm::floor((2.f * (mousePos.y - windowPos.y) / windowSize.y - 1.f - transform.w) / transform.y));
         ImGui::EndChild();
     }
+
+    ImVec2 windowPos = ImGui::GetWindowPos(), windowSize = ImGui::GetWindowSize();
+    ImVec2 center = ImVec2(windowPos.x + windowSize.x * 0.5f, windowPos.y + windowSize.y * 0.5f);
+
     ImGui::End();
     ImGui::PopStyleVar();
+
+    if (m_state == GAME_WIN)
+        showWinWindow(center);
+    else if (m_state == GAME_LOSE)
+        showLoseWindow(center);
 }
 
 Operation Minesweeper::getOperation()
@@ -102,7 +187,30 @@ Operation Minesweeper::getOperation()
 
 void Minesweeper::update()
 {
-    m_mineMap.update(m_mineMapMouseY, m_mineMapMouseX, getOperation());
+    if (m_state == GAME_PLAYING)
+    {
+        m_mineMap.update(m_mineMapMouseY, m_mineMapMouseX, getOperation());
+        auto gs = m_mineMap.getGameState();
+
+        if (gs.state == GameState::CONTINUE)
+        {
+            m_state = GAME_PLAYING;
+        }
+        else if (gs.state == GameState::LOSE)
+        {
+            m_state = GAME_LOSE;
+        }
+        else // if(gs.state == GameState::WIN)
+        {
+            m_state = GAME_WIN;
+        }
+    }
+    else if (m_state == GAME_INIT)
+    {
+        m_mineMap.init(m_difficulty.width, m_difficulty.height, m_difficulty.mineCount);
+        m_mineMapRenderer.create(m_mineMap);
+        m_state = GAME_PLAYING;
+    }
 }
 
 void Minesweeper::terminate()
