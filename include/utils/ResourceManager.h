@@ -16,6 +16,8 @@ public:
 
     static Shader &getShader(const std::string &name);
     static Texture2D &getTexture(const std::string &name);
+
+    static void cleanup();
 };
 
 #endif

@@ -80,3 +80,9 @@ Texture2D &ResourceManager::getTexture(const std::string &name)
     assert(ite != m_textures.end());
     return ite->second;
 }
+
+void ResourceManager::cleanup()
+{
+    m_shaders.clear();
+    m_textures.clear();
+}
