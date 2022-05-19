@@ -151,7 +151,6 @@ void Minesweeper::showTimer()
     ImGui::Image((ImTextureID)m_timerIntRenderer.tex(), ImVec2(m_timerIntRenderer.width(), m_timerIntRenderer.height()));
     ImGui::SameLine();
     ImGui::Image((ImTextureID)m_timerDecRenderer.tex(), ImVec2(m_timerDecRenderer.width(), m_timerDecRenderer.height()));
-    ImGui::SameLine();
 }
 
 void Minesweeper::showRemainingMineCount()
@@ -163,6 +162,8 @@ void Minesweeper::showRemainingMineCount()
     d[1] = c / 10;
     d[2] = c % 10;
     m_mineCountRenderer.render(d);
+
+    ImGui::SameLine(ImGui::GetWindowSize().x - m_mineCountRenderer.width() - 10);
     ImGui::Image((ImTextureID)m_mineCountRenderer.tex(), ImVec2(m_mineCountRenderer.width(), m_mineCountRenderer.height()));
 }
 
