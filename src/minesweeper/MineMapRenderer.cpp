@@ -129,17 +129,17 @@ glm::vec4 MineMapRenderer::render(uint16_t viewportWidth, uint16_t viewportHeigh
     float iaspect = static_cast<float>(h) / static_cast<float>(w);
     if (w * mh - h * mw > 0)
     {
-        view.x = 2.f / mw * iaspect;
+        view.x = 2.f / mh * iaspect;
         view.y = 2.f / mh;
-        view.z = -iaspect;
+        view.z = -view.x * mw * 0.5f;
         view.w = -1.f;
     }
     else
     {
         view.x = 2.f / mw;
-        view.y = 2.f / mh / iaspect;
+        view.y = 2.f / mw / iaspect;
         view.z = -1.f;
-        view.w = -1.f / iaspect;
+        view.w = -view.y * mh * 0.5f;
     }
 
     m_VAO.bind();

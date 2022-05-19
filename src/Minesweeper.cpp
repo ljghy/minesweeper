@@ -1,10 +1,9 @@
-#include <iostream>
-
 #include <imgui.h>
 
 #include <Minesweeper.h>
 
 #include <utils/ResourceManager.h>
+#include <algorithm>
 namespace minesweeper
 {
 
@@ -16,9 +15,19 @@ void Minesweeper::init(int argc, char *argv[])
     ResourceManager::loadShaderFromFile("../res/shaders/background.shader", "background_shader");
     ResourceManager::loadTextureFromFile("../res/textures/background_tex.png", "background_tex");
 
+    ResourceManager::loadTextureFromFile("../res/textures/digits_tex.png", "digits_tex", GL_NEAREST);
+
     m_mineMap.init(m_difficulty.width, m_difficulty.height, m_difficulty.mineCount);
     m_mineMapRenderer.create(m_mineMap);
     m_state = GAME_IDLE;
+}
+
+void Minesweeper::initGame()
+{
+    m_mineMap.init(m_difficulty.width, m_difficulty.height, m_difficulty.mineCount);
+    m_timer.clear();
+    m_state = GAME_INIT;
+    m_remainingMineCount = m_difficulty.mineCount;
 }
 
 void Minesweeper::showMenuBar()
@@ -28,10 +37,39 @@ void Minesweeper::showMenuBar()
         if (ImGui::BeginMenu("Game"))
         {
             if (ImGui::MenuItem("New"))
+                initGame();
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Easy", NULL, m_difficulty.difficulty == EASY) && m_difficulty.difficulty != EASY)
             {
+                m_difficulty = DifficultySelection(EASY);
+                initGame();
+            }
+            if (ImGui::MenuItem("Normal", NULL, m_difficulty.difficulty == NORMAL) && m_difficulty.difficulty != NORMAL)
+            {
+                m_difficulty = DifficultySelection(NORMAL);
+                initGame();
+            }
+            if (ImGui::MenuItem("Hard", NULL, m_difficulty.difficulty == HARD) && m_difficulty.difficulty != HARD)
+            {
+                m_difficulty = DifficultySelection(HARD);
+                initGame();
+            }
+            if (ImGui::MenuItem("Custom", NULL, m_difficulty.difficulty == CUSTOM) && m_difficulty.difficulty != CUSTOM)
+            {
+                m_difficulty = DifficultySelection(CUSTOM, 10, 10, 10);
+                initGame();
+            }
+
+            ImGui::Separator();
+            if (ImGui::MenuItem("Quit"))
+            {
+                m_state = GAME_QUIT;
             }
             ImGui::EndMenu();
         }
+
         if (ImGui::BeginMenu("Options"))
         {
             if (ImGui::MenuItem("Preferences"))
@@ -79,7 +117,7 @@ void Minesweeper::showFinishWindow(const ImVec2 &center)
 
     if (ImGui::Button("New game"))
     {
-        m_state = GAME_INIT;
+        initGame();
         ImGui::SetWindowFocus("Viewport");
     }
 
@@ -88,6 +126,34 @@ void Minesweeper::showFinishWindow(const ImVec2 &center)
         m_state = GAME_QUIT;
 
     ImGui::End();
+}
+
+void Minesweeper::showTimer()
+{
+    float t = m_timer.query();
+    uint8_t d[6];
+    assert(t >= 0.f);
+    if (t > 999.999f || t < 0.f)
+        std::fill(d, d + 6, 9);
+    else
+    {
+        uint16_t a = static_cast<uint16_t>(t);
+        d[0] = a / 100;
+        d[1] = a / 10 % 10;
+        d[2] = a % 10;
+        a = static_cast<uint16_t>((t - a) * 1000.f + 0.5f) % 1000;
+        d[3] = a / 100;
+        d[4] = a / 10 % 10;
+        d[5] = a % 10;
+    }
+    ImGui::Text("%.3f", t);
+
+    ImGui::SameLine();
+}
+
+void Minesweeper::showRemainingMineCount()
+{
+    ImGui::Text("%d", m_remainingMineCount);
 }
 
 void Minesweeper::renderGui()
@@ -105,8 +171,9 @@ void Minesweeper::renderGui()
                      ImGuiWindowFlags_NoDocking);
 
     showMenuBar();
+    showTimer();
+    showRemainingMineCount();
 
-    ImGui::Text("%.3fs", m_timer.query());
     ImGui::Separator();
 
     {
@@ -167,28 +234,28 @@ void Minesweeper::update()
 {
     if (m_state == GAME_PLAYING || m_state == GAME_IDLE)
     {
+        auto oprt = getOperation();
         if (m_mineMapMouseX >= 0 && m_mineMapMouseX < m_mineMap.getWidth() && m_mineMapMouseY >= 0 && m_mineMapMouseY < m_mineMap.getHeight())
         {
-            auto oprt = getOperation();
-            if (m_state == GAME_IDLE && oprt == UNCOVER_SINGLE)
+            if (m_state == GAME_IDLE && oprt == UNCOVER_SINGLE && m_mineMap.getBlockInfo(m_mineMapMouseY, m_mineMapMouseX).state == COVERED)
             {
                 m_timer.start();
                 m_mineMap.init(m_difficulty.width, m_difficulty.height, m_difficulty.mineCount, m_mineMapMouseX, m_mineMapMouseY);
                 m_state = GAME_PLAYING;
             }
-            m_mineMap.update(m_mineMapMouseY, m_mineMapMouseX, oprt);
-            auto gs = m_mineMap.getGameState();
-
-            if (gs.state == GameState::LOSE)
-            {
-                m_state = GAME_LOSE;
-                m_timer.stop();
-            }
-            else if (gs.state == GameState::WIN)
-            {
-                m_state = GAME_WIN;
-                m_timer.stop();
-            }
+        }
+        m_mineMap.update(m_mineMapMouseY, m_mineMapMouseX, oprt);
+        auto gs = m_mineMap.getGameState();
+        m_remainingMineCount = gs.remainingMineCount;
+        if (gs.state == GameState::LOSE)
+        {
+            m_state = GAME_LOSE;
+            m_timer.stop();
+        }
+        else if (gs.state == GameState::WIN)
+        {
+            m_state = GAME_WIN;
+            m_timer.stop();
         }
     }
     else if (m_state == GAME_INIT)

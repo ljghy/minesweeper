@@ -21,7 +21,7 @@ public:
     float query()
     {
         if (!m_started)
-            return 0.f;
+            return m_record;
         auto currTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<float> dur = currTime - m_startTime;
         return dur.count();
@@ -39,6 +39,12 @@ public:
     float record() const
     {
         return m_record;
+    }
+
+    void clear()
+    {
+        m_record = 0.f;
+        m_started = false;
     }
 };
 

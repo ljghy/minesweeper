@@ -61,7 +61,7 @@ int main(int argc, char **argv)
 #endif
 
     // Create window with graphics context
-    GLFWwindow *window = glfwCreateWindow(640, 480, "Minesweeper", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(1280, 720, "Minesweeper", NULL, NULL);
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);

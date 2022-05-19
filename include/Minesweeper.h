@@ -4,7 +4,7 @@
 #include <minesweeper/MineMap.h>
 #include <minesweeper/MineMapRenderer.h>
 #include <utils/Timer.hpp>
-
+#include <opengl_framework/common.h>
 namespace minesweeper
 {
 enum Difficulty
@@ -34,8 +34,8 @@ struct DifficultySelection
         switch (d)
         {
         case EASY:
-            width = 9;
-            height = 9;
+            width = 8;
+            height = 8;
             mineCount = 10;
             break;
         case NORMAL:
@@ -70,6 +70,7 @@ private:
 
     DifficultySelection m_difficulty;
     Timer m_timer;
+    int16_t m_remainingMineCount;
 
     enum
     {
@@ -81,6 +82,10 @@ private:
         GAME_QUIT
     } m_state;
 
+    void initGame();
+
+    void showTimer();
+    void showRemainingMineCount();
     void showMenuBar();
     void showStatistics();
     void showFinishWindow(const ImVec2 &center);
