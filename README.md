@@ -35,3 +35,5 @@ make
 export MESA_GL_VERSION_OVERRIDE=3.3
 ../bin/minesweeper
 ```
+
+![minesweeper_hard](https://github.com/ljghy/minesweeper/blob/master/res/screenshots/minesweeper_hard.png)
