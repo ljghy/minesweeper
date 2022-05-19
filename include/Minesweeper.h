@@ -3,6 +3,7 @@
 
 #include <minesweeper/MineMap.h>
 #include <minesweeper/MineMapRenderer.h>
+#include <minesweeper/DigitRenderer.h>
 #include <utils/Timer.hpp>
 #include <opengl_framework/common.h>
 namespace minesweeper
@@ -72,9 +73,12 @@ private:
     Timer m_timer;
     int16_t m_remainingMineCount;
 
+    DigitRenderer m_timerIntRenderer;
+    DigitRenderer m_timerDecRenderer;
+    DigitRenderer m_mineCountRenderer;
+
     enum
     {
-        GAME_INIT,
         GAME_IDLE,
         GAME_PLAYING,
         GAME_WIN,

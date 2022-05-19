@@ -15,18 +15,21 @@ void Minesweeper::init(int argc, char *argv[])
     ResourceManager::loadShaderFromFile("../res/shaders/background.shader", "background_shader");
     ResourceManager::loadTextureFromFile("../res/textures/background_tex.png", "background_tex");
 
+    ResourceManager::loadShaderFromFile("../res/shaders/digit.shader", "digit_shader");
     ResourceManager::loadTextureFromFile("../res/textures/digits_tex.png", "digits_tex", GL_NEAREST);
 
-    m_mineMap.init(m_difficulty.width, m_difficulty.height, m_difficulty.mineCount);
-    m_mineMapRenderer.create(m_mineMap);
-    m_state = GAME_IDLE;
+    m_timerIntRenderer.create(96, 60);
+    m_timerDecRenderer.create(48, 30);
+    m_mineCountRenderer.create(96, 60);
+    initGame();
 }
 
 void Minesweeper::initGame()
 {
     m_mineMap.init(m_difficulty.width, m_difficulty.height, m_difficulty.mineCount);
+    m_mineMapRenderer.create(m_mineMap);
+    m_state = GAME_IDLE;
     m_timer.clear();
-    m_state = GAME_INIT;
     m_remainingMineCount = m_difficulty.mineCount;
 }
 
@@ -116,10 +119,7 @@ void Minesweeper::showFinishWindow(const ImVec2 &center)
     ImGui::Separator();
 
     if (ImGui::Button("New game"))
-    {
         initGame();
-        ImGui::SetWindowFocus("Viewport");
-    }
 
     ImGui::SameLine();
     if (ImGui::Button("Quit"))
@@ -131,7 +131,7 @@ void Minesweeper::showFinishWindow(const ImVec2 &center)
 void Minesweeper::showTimer()
 {
     float t = m_timer.query();
-    uint8_t d[6];
+    int d[6];
     assert(t >= 0.f);
     if (t > 999.999f || t < 0.f)
         std::fill(d, d + 6, 9);
@@ -146,14 +146,24 @@ void Minesweeper::showTimer()
         d[4] = a / 10 % 10;
         d[5] = a % 10;
     }
-    ImGui::Text("%.3f", t);
-
+    m_timerIntRenderer.render(d);
+    m_timerDecRenderer.render(d + 3);
+    ImGui::Image((ImTextureID)m_timerIntRenderer.tex(), ImVec2(m_timerIntRenderer.width(), m_timerIntRenderer.height()));
+    ImGui::SameLine();
+    ImGui::Image((ImTextureID)m_timerDecRenderer.tex(), ImVec2(m_timerDecRenderer.width(), m_timerDecRenderer.height()));
     ImGui::SameLine();
 }
 
 void Minesweeper::showRemainingMineCount()
 {
-    ImGui::Text("%d", m_remainingMineCount);
+    int c = m_remainingMineCount;
+    int d[3];
+    d[0] = c < 0 ? 10 : 0;
+    c = std::min(std::abs(c), 99);
+    d[1] = c / 10;
+    d[2] = c % 10;
+    m_mineCountRenderer.render(d);
+    ImGui::Image((ImTextureID)m_mineCountRenderer.tex(), ImVec2(m_mineCountRenderer.width(), m_mineCountRenderer.height()));
 }
 
 void Minesweeper::renderGui()
@@ -225,7 +235,10 @@ Operation Minesweeper::getOperation()
         return MARK_BLOCK;
 
     if (leftClickedOnly && lr)
+    {
+        leftClickedOnly = false;
         return UNCOVER_SINGLE;
+    }
 
     return HOVER;
 }
@@ -257,12 +270,6 @@ void Minesweeper::update()
             m_state = GAME_WIN;
             m_timer.stop();
         }
-    }
-    else if (m_state == GAME_INIT)
-    {
-        m_mineMap.init(m_difficulty.width, m_difficulty.height, m_difficulty.mineCount);
-        m_mineMapRenderer.create(m_mineMap);
-        m_state = GAME_IDLE;
     }
 }
 

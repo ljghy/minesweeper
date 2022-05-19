@@ -3,7 +3,6 @@
 
 #include <minesweeper/MineMap.h>
 #include <opengl_framework/common.h>
-#include <array>
 
 namespace minesweeper
 {
