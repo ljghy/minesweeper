@@ -18,6 +18,8 @@
 #include <Minesweeper.h>
 #include <utils/ResourceManager.h>
 
+#include <stb/stb_image.h>
+
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
 // To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
 // Your own project should not be affected, as you are likely to link with a newer binary of GLFW that is adequate for your version of Visual Studio.
@@ -66,6 +68,10 @@ int main(int argc, char **argv)
         return 1;
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
+
+    GLFWimage icon[1];
+    icon[0].pixels = stbi_load("../res/textures/window_icon.png", &icon[0].width, &icon[0].height, NULL, 4);
+    glfwSetWindowIcon(window, 1, icon);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
