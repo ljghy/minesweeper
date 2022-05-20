@@ -3,6 +3,7 @@
 
 #include <minesweeper/MineMap.h>
 #include <opengl_framework/common.h>
+#include <array>
 
 namespace minesweeper
 {
@@ -29,7 +30,7 @@ private:
 public:
     MineMapRenderer() : m_viewportWidth(640), m_viewportHeight(480) {}
     void create(MineMap &mineMap);
-    glm::vec4 render(uint16_t viewportWidth, uint16_t viewportHeight);
+    std::array<float, 4> render(uint16_t viewportWidth, uint16_t viewportHeight);
     unsigned int tex() const;
 };
 }; // namespace minesweeper

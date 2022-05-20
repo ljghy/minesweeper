@@ -4,6 +4,7 @@
 
 #include <utils/ResourceManager.h>
 #include <algorithm>
+#include <cmath>
 namespace minesweeper
 {
 
@@ -232,12 +233,12 @@ void Minesweeper::renderGui()
         ImGui::BeginChild("Minemap");
         windowPos = ImGui::GetWindowPos();
         windowSize = ImGui::GetWindowSize();
-        glm::vec4 transform = m_mineMapRenderer.render(static_cast<uint16_t>(windowSize.x + 0.5f), static_cast<uint16_t>(windowSize.y + 0.5f));
+        auto transform = m_mineMapRenderer.render(static_cast<uint16_t>(windowSize.x + 0.5f), static_cast<uint16_t>(windowSize.y + 0.5f));
         ImGui::Image(reinterpret_cast<ImTextureID>(m_mineMapRenderer.tex()), windowSize, ImVec2(0, 0), ImVec2(1, 1));
 
         ImVec2 mousePos = ImGui::GetMousePos();
-        m_mineMapMouseX = static_cast<int16_t>(glm::floor((2.f * (mousePos.x - windowPos.x) / windowSize.x - 1.f - transform.z) / transform.x));
-        m_mineMapMouseY = static_cast<int16_t>(glm::floor((2.f * (mousePos.y - windowPos.y) / windowSize.y - 1.f - transform.w) / transform.y));
+        m_mineMapMouseX = static_cast<int16_t>(std::floor((2.f * (mousePos.x - windowPos.x) / windowSize.x - 1.f - transform[2]) / transform[0]));
+        m_mineMapMouseY = static_cast<int16_t>(std::floor((2.f * (mousePos.y - windowPos.y) / windowSize.y - 1.f - transform[3]) / transform[1]));
         ImGui::EndChild();
     }
 

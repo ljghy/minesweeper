@@ -22,7 +22,6 @@ PRIVATE
     ${PROJECT_SOURCE_DIR}/deps/glad/include
     ${PROJECT_SOURCE_DIR}/deps/glfw/include
     ${PROJECT_SOURCE_DIR}/include/imgui
-    ${PROJECT_SOURCE_DIR}/include/glm
     ${PROJECT_SOURCE_DIR}/include
 )
 

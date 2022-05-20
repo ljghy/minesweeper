@@ -68,19 +68,9 @@ void Shader::setUniform1i(const char *name, int n) const
     glUniform1i(glGetUniformLocation(m_id, name), n);
 }
 
-void Shader::setUniformMatrix4fv(const char *name, bool transpose, const glm::mat4 m) const
+void Shader::setUniform3fv(const char *name, float *v) const
 {
-    glUniformMatrix4fv(glGetUniformLocation(m_id, name), 1, transpose, &m[0][0]);
-}
-
-void Shader::setUniformMatrix4fv(const char *name, unsigned int count, bool transpose, const float *ptr) const
-{
-    glUniformMatrix4fv(glGetUniformLocation(m_id, name), count, transpose, ptr);
-}
-
-void Shader::setUniform3fv(const char *name, const glm::vec3 v) const
-{
-    glUniform3fv(glGetUniformLocation(m_id, name), 1, &v.x);
+    glUniform3fv(glGetUniformLocation(m_id, name), 1, v);
 }
 
 void Shader::setUniform1f(const char *name, float f) const
@@ -88,7 +78,7 @@ void Shader::setUniform1f(const char *name, float f) const
     glUniform1f(glGetUniformLocation(m_id, name), f);
 }
 
-void Shader::setUniform4fv(const char *name, const glm::vec4 v) const
+void Shader::setUniform4fv(const char *name, float *v) const
 {
-    glUniform4fv(glGetUniformLocation(m_id, name), 1, &v.x);
+    glUniform4fv(glGetUniformLocation(m_id, name), 1, v);
 }

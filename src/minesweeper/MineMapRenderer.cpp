@@ -67,7 +67,7 @@ void MineMapRenderer::create(MineMap &mineMap)
     m_bkTex = &ResourceManager::getTexture("background_tex");
 }
 
-glm::vec4 MineMapRenderer::render(uint16_t viewportWidth, uint16_t viewportHeight)
+std::array<float, 4> MineMapRenderer::render(uint16_t viewportWidth, uint16_t viewportHeight)
 {
     uint16_t mw = m_pMineMap->getWidth(), mh = m_pMineMap->getHeight();
     m_VBO.bind();
@@ -94,11 +94,11 @@ glm::vec4 MineMapRenderer::render(uint16_t viewportWidth, uint16_t viewportHeigh
 
     auto &w = viewportWidth;
     auto &h = viewportHeight;
-    glm::vec4 view(1.f, 1.f, 0.f, 0.f);
+    std::array<float, 4> view{1.f, 1.f, 0.f, 0.f};
 
     m_FBO.bind();
     glViewport(0, 0, w, h);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -108,20 +108,20 @@ glm::vec4 MineMapRenderer::render(uint16_t viewportWidth, uint16_t viewportHeigh
     int tw = m_bkTex->width(), th = m_bkTex->height();
     if (w * th - h * tw > 0)
     {
-        view.y = static_cast<float>(h) / th * tw / w;
-        view.w = 0.5f * (1.f - view.y);
+        view[1] = static_cast<float>(h) / th * tw / w;
+        view[3] = 0.5f * (1.f - view[1]);
     }
     else
     {
-        view.x = static_cast<float>(w) / tw * th / h;
-        view.z = 0.5f * (1.f - view.x);
+        view[0] = static_cast<float>(w) / tw * th / h;
+        view[2] = 0.5f * (1.f - view[0]);
     }
 
     m_bkVAO.bind();
     m_pBkShader->use();
     m_bkTex->bind(0);
     m_pBkShader->setUniform1i("tex", 0);
-    m_pBkShader->setUniform4fv("view", view);
+    m_pBkShader->setUniform4fv("view", view.data());
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     // Render mine map
@@ -129,22 +129,22 @@ glm::vec4 MineMapRenderer::render(uint16_t viewportWidth, uint16_t viewportHeigh
     float iaspect = static_cast<float>(h) / static_cast<float>(w);
     if (w * mh - h * mw > 0)
     {
-        view.x = 2.f / mh * iaspect;
-        view.y = 2.f / mh;
-        view.z = -view.x * mw * 0.5f;
-        view.w = -1.f;
+        view[0] = 2.f / mh * iaspect;
+        view[1] = 2.f / mh;
+        view[2] = -view[0] * mw * 0.5f;
+        view[3] = -1.f;
     }
     else
     {
-        view.x = 2.f / mw;
-        view.y = 2.f / mw / iaspect;
-        view.z = -1.f;
-        view.w = -view.y * mh * 0.5f;
+        view[0] = 2.f / mw;
+        view[1] = 2.f / mw / iaspect;
+        view[2] = -1.f;
+        view[3] = -view[1] * mh * 0.5f;
     }
 
     m_VAO.bind();
     m_pShader->use();
-    m_pShader->setUniform4fv("view", view);
+    m_pShader->setUniform4fv("view", view.data());
     m_mineMapTex->bind(0);
     m_pShader->setUniform1i("tex", 0);
 
