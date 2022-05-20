@@ -44,7 +44,9 @@ private:
 
         GAME_EDIT_CUSTOM,
         GAME_EDIT_PLAYER_ID,
-    } m_state;
+
+        GAME_SHOW_RECORDS_WINDOW,
+    } m_state, m_prevState;
 
     void initGame();
 
@@ -55,6 +57,7 @@ private:
     void showMenuBar();
     void showStatistics();
     void showRecords();
+    void showRecordsWindow();
     void showFinishWindow();
     Operation getOperation();
 

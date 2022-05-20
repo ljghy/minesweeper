@@ -68,6 +68,45 @@ void Minesweeper::showCustomEditor()
     ImGui::End();
 }
 
+void Minesweeper::showRecordsWindow()
+{
+    ImGui::SetNextWindowPos(m_viewportCenter, ImGuiCond_Once, ImVec2(0.5f, 0.5f));
+    ImGui::Begin("Records", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
+    ImGui::SetWindowFocus("Records");
+
+    static int difficulty = 0;
+    ImGui::RadioButton("Easy", &difficulty, 0);
+    ImGui::SameLine();
+    ImGui::RadioButton("Normal", &difficulty, 1);
+    ImGui::SameLine();
+    ImGui::RadioButton("Hard", &difficulty, 2);
+
+    ImGui::Separator();
+
+    if (ImGui::BeginTable("Records", 3))
+    {
+        for (auto &rec : RecordManager::records[difficulty])
+        {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text("%s", rec.playerID.data());
+
+            ImGui::TableSetColumnIndex(1);
+            ImGui::Text("%.3fs", rec.time);
+
+            ImGui::TableSetColumnIndex(2);
+            ImGui::Text("%s", rec.timeStamp.data());
+        }
+        ImGui::EndTable();
+    }
+
+    ImGui::Separator();
+    if (ImGui::Button("OK"))
+        m_state = m_prevState;
+
+    ImGui::End();
+}
+
 void Minesweeper::showPlayerIDEditor()
 {
     ImGui::SetNextWindowPos(m_viewportCenter, ImGuiCond_Once, ImVec2(0.5f, 0.5f));
@@ -136,6 +175,13 @@ void Minesweeper::showMenuBar()
             }
 
             ImGui::Separator();
+            if (ImGui::MenuItem("Records"))
+            {
+                m_prevState = m_state;
+                m_state = GAME_SHOW_RECORDS_WINDOW;
+            }
+
+            ImGui::Separator();
             if (ImGui::MenuItem("Quit"))
             {
                 m_state = GAME_QUIT;
@@ -183,14 +229,14 @@ void Minesweeper::showStatistics()
 
 void Minesweeper::showRecords()
 {
-    if (m_difficulty.difficulty != CUSTOM)
+    if (m_difficulty.difficulty != CUSTOM && m_recordRank < recordCount)
     {
         if (ImGui::BeginTable("Records", 3))
         {
             auto i = m_recordRank;
             for (auto &rec : RecordManager::records[m_difficulty.difficulty])
             {
-                if (i == 0 || (m_recordRank < recordCount && rec.playerID == RecordManager::records[m_difficulty.difficulty][m_recordRank].playerID))
+                if (i == 0 || rec.playerID == RecordManager::records[m_difficulty.difficulty][m_recordRank].playerID)
                 {
                     ImVec4 color = i == 0 ? ImVec4(0.2f, 0.8f, 0.3f, 1.0f) : ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
                     ImGui::TableNextRow();
@@ -358,6 +404,9 @@ void Minesweeper::renderGui()
 
     if (m_state == GAME_EDIT_PLAYER_ID)
         showPlayerIDEditor();
+
+    if (m_state == GAME_SHOW_RECORDS_WINDOW)
+        showRecordsWindow();
 }
 
 Operation Minesweeper::getOperation()
@@ -410,11 +459,11 @@ void Minesweeper::update()
         m_mineMap.update(m_mineMapMouseY, m_mineMapMouseX, oprt);
         auto gs = m_mineMap.getGameState();
         m_remainingMineCount = gs.remainingMineCount;
+        m_recordRank = -1;
         if (gs.state == GameState::LOSE)
         {
             m_state = GAME_LOSE;
             m_timer.stop();
-            m_recordRank = -1;
         }
         else if (gs.state == GameState::WIN)
         {

@@ -120,7 +120,7 @@ int main(int argc, char **argv)
         // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
         // IM_ASSERT(font != NULL);
 
-        // ImFont *font = io.Fonts->AddFontFromFileTTF("../res/imgui_fonts/arial.ttf", 14.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
+        // ImFont *font = io.Fonts->AddFontFromFileTTF("../res/imgui_fonts/arial.ttf", 14.0f);
 
         io.IniFilename = nullptr;
         // Our state
