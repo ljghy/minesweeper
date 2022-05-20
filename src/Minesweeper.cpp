@@ -18,6 +18,9 @@ void Minesweeper::init(int argc, char *argv[])
     ResourceManager::loadShaderFromFile("../res/shaders/digit.shader", "digit_shader");
     ResourceManager::loadTextureFromFile("../res/textures/digits_tex.png", "digits_tex", GL_NEAREST);
 
+    ResourceManager::loadTextureFromFile("../res/textures/win_face_tex.png", "win_face_tex");
+    ResourceManager::loadTextureFromFile("../res/textures/lose_face_tex.png", "lose_face_tex");
+
     m_timerIntRenderer.create(96, 60);
     m_timerDecRenderer.create(48, 30);
     m_mineCountRenderer.create(96, 60);
@@ -31,6 +34,33 @@ void Minesweeper::initGame()
     m_state = GAME_IDLE;
     m_timer.clear();
     m_remainingMineCount = m_difficulty.mineCount;
+}
+
+void Minesweeper::showCustomEditor()
+{
+    DifficultySelection prevDiff = m_difficulty;
+    auto prevState = m_state;
+    ImGui::SetNextWindowPos(m_viewportCenter, ImGuiCond_Once, ImVec2(0.5f, 0.5f));
+    ImGui::Begin("Custom Editor", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
+    ImGui::SetWindowFocus("Custom Editor");
+
+    static int customWidth = 8, customHeight = 8, customMineCount = 10;
+
+    ImGui::SliderInt("width", &customWidth, 8, 30);
+    ImGui::SliderInt("height", &customHeight, 8, 30);
+    ImGui::SliderInt("mines", &customMineCount, 1, customWidth * customHeight / 2);
+
+    ImGui::Separator();
+    if (ImGui::Button("Apply"))
+    {
+        m_difficulty = DifficultySelection(CUSTOM, customWidth, customHeight, customMineCount);
+        initGame();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Cancel"))
+        initGame();
+
+    ImGui::End();
 }
 
 void Minesweeper::showMenuBar()
@@ -59,10 +89,9 @@ void Minesweeper::showMenuBar()
                 m_difficulty = DifficultySelection(HARD);
                 initGame();
             }
-            if (ImGui::MenuItem("Custom", NULL, m_difficulty.difficulty == CUSTOM) && m_difficulty.difficulty != CUSTOM)
+            if (ImGui::MenuItem("Custom", NULL, m_difficulty.difficulty == CUSTOM))
             {
-                m_difficulty = DifficultySelection(CUSTOM, 10, 10, 10);
-                initGame();
+                m_state = GAME_EDIT_CUSTOM;
             }
 
             ImGui::Separator();
@@ -100,17 +129,24 @@ void Minesweeper::showStatistics()
     }
 }
 
-void Minesweeper::showFinishWindow(const ImVec2 &center)
+void Minesweeper::showFinishWindow()
 {
-    auto io = ImGui::GetIO();
-    ImGui::SetNextWindowPos(center, ImGuiCond_Once, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowPos(m_viewportCenter, ImGuiCond_Once, ImVec2(0.5f, 0.5f));
     ImGui::Begin("Minesweeper", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
     ImGui::SetWindowFocus("Minesweeper");
 
     if (m_state == GAME_WIN)
+    {
+        ImGui::Image((ImTextureID)ResourceManager::getTexture("win_face_tex").id(), ImVec2(34, 34));
+        ImGui::SameLine();
         ImGui::Text("You Win!");
+    }
     else
+    {
+        ImGui::Image((ImTextureID)ResourceManager::getTexture("lose_face_tex").id(), ImVec2(34, 34));
+        ImGui::SameLine();
         ImGui::Text("You Lose!");
+    }
 
     ImGui::Separator();
 
@@ -181,6 +217,10 @@ void Minesweeper::renderGui()
                      ImGuiWindowFlags_MenuBar |
                      ImGuiWindowFlags_NoDocking);
 
+    ImVec2 windowPos = ImGui::GetWindowPos();
+    ImVec2 windowSize = ImGui::GetWindowSize();
+    m_viewportCenter = ImVec2(windowPos.x + windowSize.x * 0.5f, windowPos.y + windowSize.y * 0.5f);
+
     showMenuBar();
     showTimer();
     showRemainingMineCount();
@@ -190,25 +230,25 @@ void Minesweeper::renderGui()
     {
 
         ImGui::BeginChild("Minemap");
-        ImVec2 windowSize = ImGui::GetWindowSize();
+        windowPos = ImGui::GetWindowPos();
+        windowSize = ImGui::GetWindowSize();
         glm::vec4 transform = m_mineMapRenderer.render(static_cast<uint16_t>(windowSize.x + 0.5f), static_cast<uint16_t>(windowSize.y + 0.5f));
         ImGui::Image(reinterpret_cast<ImTextureID>(m_mineMapRenderer.tex()), windowSize, ImVec2(0, 0), ImVec2(1, 1));
 
-        ImVec2 windowPos = ImGui::GetWindowPos();
         ImVec2 mousePos = ImGui::GetMousePos();
         m_mineMapMouseX = static_cast<int16_t>(glm::floor((2.f * (mousePos.x - windowPos.x) / windowSize.x - 1.f - transform.z) / transform.x));
         m_mineMapMouseY = static_cast<int16_t>(glm::floor((2.f * (mousePos.y - windowPos.y) / windowSize.y - 1.f - transform.w) / transform.y));
         ImGui::EndChild();
     }
 
-    ImVec2 windowPos = ImGui::GetWindowPos(), windowSize = ImGui::GetWindowSize();
-    ImVec2 center = ImVec2(windowPos.x + windowSize.x * 0.5f, windowPos.y + windowSize.y * 0.5f);
-
     ImGui::End();
     ImGui::PopStyleVar();
 
     if (m_state == GAME_WIN || m_state == GAME_LOSE)
-        showFinishWindow(center);
+        showFinishWindow();
+
+    if (m_state == GAME_EDIT_CUSTOM)
+        showCustomEditor();
 }
 
 Operation Minesweeper::getOperation()

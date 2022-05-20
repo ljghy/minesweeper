@@ -69,10 +69,12 @@ private:
 
     uint32_t m_seed;
 
-    std::vector<std::vector<BlockInfo>> m_mineMap; // [row(height)][col(width)]
+    std::vector<std::vector<BlockInfo>> m_mineMap;        // [row(height)][col(width)]
     std::vector<std::pair<uint16_t, uint16_t>> m_minePos; //(r, c)
     void unhighlight();
     void boom();
+
+    bool m_questionMarkEnabled;
 
 public:
     MineMap();
@@ -84,7 +86,11 @@ public:
     inline uint16_t getHeight() const { return m_height; }
     inline uint16_t getMineCount() const { return m_mineCount; }
 
+    void enableQuestionMark();
+    void disableQuestionMark();
+
     ~MineMap() = default;
 };
+
 } // namespace minesweeper
 #endif

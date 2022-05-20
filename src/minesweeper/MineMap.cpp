@@ -12,7 +12,7 @@ static int8_t neighborX[]{-1, 0, 1, -1, 1, -1, 0, 1};
 static int8_t neighborY[]{-1, -1, -1, 0, 0, 1, 1, 1};
 
 MineMap::MineMap()
-    : m_width(0), m_height(0), m_mineCount(0)
+    : m_width(0), m_height(0), m_mineCount(0), m_questionMarkEnabled(false)
 {
 }
 
@@ -191,7 +191,7 @@ void MineMap::update(uint16_t row, uint16_t col, Operation oprt)
             if (block.state == COVERED)
                 block.state = COVERED_FLAGGED;
             else if (block.state == COVERED_FLAGGED)
-                block.state = COVERED_UNDETERMINED;
+                block.state = m_questionMarkEnabled ? COVERED_UNDETERMINED : COVERED;
             else if (block.state == COVERED_UNDETERMINED)
                 block.state = COVERED;
         }
@@ -233,6 +233,23 @@ GameState MineMap::getGameState()
         }
     }
     return ret;
+}
+
+void MineMap::enableQuestionMark()
+{
+    m_questionMarkEnabled = true;
+}
+
+void MineMap::disableQuestionMark()
+{
+    if (m_questionMarkEnabled)
+    {
+        m_questionMarkEnabled = false;
+        for (auto &row : m_mineMap)
+            for (auto &b : row)
+                if (b.state == COVERED_UNDETERMINED)
+                    b.state = COVERED;
+    }
 }
 
 } // namespace minesweeper

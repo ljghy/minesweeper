@@ -77,22 +77,27 @@ private:
     DigitRenderer m_timerDecRenderer;
     DigitRenderer m_mineCountRenderer;
 
+    ImVec2 m_viewportCenter;
+
     enum
     {
         GAME_IDLE,
         GAME_PLAYING,
         GAME_WIN,
         GAME_LOSE,
-        GAME_QUIT
+        GAME_QUIT,
+
+        GAME_EDIT_CUSTOM,
     } m_state;
 
     void initGame();
 
     void showTimer();
     void showRemainingMineCount();
+    void showCustomEditor();
     void showMenuBar();
     void showStatistics();
-    void showFinishWindow(const ImVec2 &center);
+    void showFinishWindow();
     Operation getOperation();
 
 public:
