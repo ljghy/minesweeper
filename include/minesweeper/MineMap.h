@@ -3,62 +3,10 @@
 
 #include <cstdint>
 #include <vector>
+#include <minesweeper/MinesweeperDefs.h>
 
 namespace minesweeper
 {
-
-enum Operation
-{
-    HOVER = 0,
-    UNCOVER_SINGLE = 1,     // left released
-    UNCOVER_BATCH = 2,      // left + right released or wheel released
-    MARK_BLOCK = 3,         // right click
-    HIGHLIGHT_NEIGHBORS = 4 // left + right pressed or wheel pressed
-};
-
-constexpr uint8_t UNCOVERED_START = 4;
-
-enum BlockState
-{
-    COVERED = 0,
-    COVERED_FLAGGED = 1,
-    COVERED_UNDETERMINED = 2,
-
-    UNCOVERED_0 = 4,
-    UNCOVERED_1 = 5,
-    UNCOVERED_2 = 6,
-    UNCOVERED_3 = 7,
-    UNCOVERED_4 = 8,
-    UNCOVERED_5 = 9,
-    UNCOVERED_6 = 10,
-    UNCOVERED_7 = 11,
-    UNCOVERED_8 = 12,
-    UNCOVERED_BOOM = 13,
-    UNCOVERED_FLAGGED = 14,
-};
-
-struct BlockInfo
-{
-    bool isMine = false;
-    BlockState state = COVERED;
-    bool isHighlighted = false;
-    uint8_t neighborMineCount = 0;
-
-    bool isCovered() const { return state < UNCOVERED_START; }
-    bool isUncovered() const { return state >= UNCOVERED_START; }
-    bool isFlagged() const { return state == COVERED_FLAGGED; }
-};
-
-struct GameState
-{
-    enum
-    {
-        WIN,
-        LOSE,
-        CONTINUE
-    } state;
-    int16_t remainingMineCount;
-};
 
 class MineMap
 {

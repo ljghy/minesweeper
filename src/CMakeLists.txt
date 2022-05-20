@@ -12,6 +12,7 @@ PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/minesweeper/MineMap.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/minesweeper/MineMapRenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/minesweeper/DigitRenderer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/minesweeper/RecordManager.cpp
     
     ${CMAKE_CURRENT_SOURCE_DIR}/utils/ResourceManager.cpp
 

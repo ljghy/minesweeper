@@ -4,59 +4,11 @@
 #include <minesweeper/MineMap.h>
 #include <minesweeper/MineMapRenderer.h>
 #include <minesweeper/DigitRenderer.h>
+#include <minesweeper/MinesweeperDefs.h>
 #include <utils/Timer.hpp>
 #include <opengl_framework/common.h>
 namespace minesweeper
 {
-enum Difficulty
-{
-    EASY = 0,
-    NORMAL = 1,
-    HARD = 2,
-    CUSTOM = 3
-};
-
-inline const char *difficultyStr[]{
-    "Easy",
-    "Normal",
-    "Hard",
-    "Custom"};
-
-struct DifficultySelection
-{
-    Difficulty difficulty;
-    uint16_t width;
-    uint16_t height;
-    uint16_t mineCount;
-
-    DifficultySelection(Difficulty d = EASY, uint16_t w = 0, uint16_t h = 0, uint16_t m = 0)
-        : difficulty(d)
-    {
-        switch (d)
-        {
-        case EASY:
-            width = 8;
-            height = 8;
-            mineCount = 10;
-            break;
-        case NORMAL:
-            width = 16;
-            height = 16;
-            mineCount = 40;
-            break;
-        case HARD:
-            width = 30;
-            height = 16;
-            mineCount = 99;
-            break;
-        case CUSTOM:
-            width = w;
-            height = h;
-            mineCount = m;
-            break;
-        }
-    }
-};
 
 class Minesweeper
 {
@@ -79,6 +31,9 @@ private:
 
     ImVec2 m_viewportCenter;
 
+    float m_recordTime;
+    uint8_t m_recordRank;
+
     enum
     {
         GAME_IDLE,
@@ -88,6 +43,7 @@ private:
         GAME_QUIT,
 
         GAME_EDIT_CUSTOM,
+        GAME_EDIT_PLAYER_ID,
     } m_state;
 
     void initGame();
@@ -95,12 +51,15 @@ private:
     void showTimer();
     void showRemainingMineCount();
     void showCustomEditor();
+    void showPlayerIDEditor();
     void showMenuBar();
     void showStatistics();
+    void showRecords();
     void showFinishWindow();
     Operation getOperation();
 
 public:
+    Minesweeper();
     void init(int argc, char *argv[]);
     void update();
     void renderGui();
