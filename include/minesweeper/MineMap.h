@@ -33,7 +33,8 @@ enum BlockState
     UNCOVERED_6 = 10,
     UNCOVERED_7 = 11,
     UNCOVERED_8 = 12,
-    UNCOVERED_BOOM = 13
+    UNCOVERED_BOOM = 13,
+    UNCOVERED_FLAGGED = 14,
 };
 
 struct BlockInfo
@@ -69,7 +70,7 @@ private:
     uint32_t m_seed;
 
     std::vector<std::vector<BlockInfo>> m_mineMap; // [row(height)][col(width)]
-
+    std::vector<std::pair<uint16_t, uint16_t>> m_minePos; //(r, c)
     void unhighlight();
     void boom();
 
@@ -77,7 +78,7 @@ public:
     MineMap();
     void init(uint16_t width, uint16_t height, uint16_t mineCount, int16_t excludeX = -1, int16_t excludeY = -1, int32_t seed = -1);
     void update(uint16_t row, uint16_t col, Operation oprt);
-    GameState getGameState() const;
+    GameState getGameState();
     BlockInfo getBlockInfo(uint16_t row, uint16_t col) const;
     inline uint16_t getWidth() const { return m_width; }
     inline uint16_t getHeight() const { return m_height; }

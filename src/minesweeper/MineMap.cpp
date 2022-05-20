@@ -38,12 +38,15 @@ void MineMap::init(uint16_t width, uint16_t height, uint16_t mineCount, int16_t 
     if (excludeX >= 0 && excludeX < width && excludeY >= 0 && excludeY < height)
         m_mineMap[excludeY][excludeX].isMine = true;
     mineCount = 0;
+    m_minePos.clear();
+    m_minePos.reserve(m_mineCount);
     while (mineCount < m_mineCount)
     {
         uint16_t r = rand() % m_height, c = rand() % m_width;
         if (!m_mineMap[r][c].isMine)
         {
             m_mineMap[r][c].isMine = true;
+            m_minePos.push_back(std::make_pair(r, c));
             for (uint8_t i = 0; i < 8; ++i)
             {
                 int16_t x = r + neighborX[i], y = c + neighborY[i];
@@ -207,7 +210,7 @@ BlockInfo MineMap::getBlockInfo(uint16_t row, uint16_t col) const
     return m_mineMap[row][col];
 }
 
-GameState MineMap::getGameState() const
+GameState MineMap::getGameState()
 {
     GameState ret{GameState::CONTINUE, static_cast<int16_t>(m_mineCount)};
     uint16_t uncovered = 0;
@@ -222,7 +225,13 @@ GameState MineMap::getGameState() const
                 ++uncovered;
         }
     if (uncovered + m_mineCount == m_height * m_width)
+    {
         ret.state = GameState::WIN;
+        for (const auto &p : m_minePos)
+        {
+            m_mineMap[p.first][p.second].state = UNCOVERED_FLAGGED;
+        }
+    }
     return ret;
 }
 

@@ -11,7 +11,7 @@ out vec2 texCoords;
 void main()
 {
     gl_Position = vec4(aPosuv.xy * view.xy + view.zw, 0.0, 1.0); 
-    texCoords = vec2(aPosuv.z, (aPosuv.w + aTexId) / 14.0);
+    texCoords = vec2(aPosuv.z, (aPosuv.w + aTexId) / 15.0);
 }
 
 #shader fragment
