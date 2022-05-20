@@ -86,6 +86,7 @@ public:
     inline uint16_t getHeight() const { return m_height; }
     inline uint16_t getMineCount() const { return m_mineCount; }
 
+    bool isQuestionMarkEnabled() const { return m_questionMarkEnabled; }
     void enableQuestionMark();
     void disableQuestionMark();
 

@@ -105,6 +105,16 @@ void Minesweeper::showMenuBar()
 
         if (ImGui::BeginMenu("Options"))
         {
+            if (m_mineMap.isQuestionMarkEnabled())
+            {
+                if (ImGui::MenuItem("Disable [?]"))
+                    m_mineMap.disableQuestionMark();
+            }
+            else
+            {
+                if (ImGui::MenuItem("Enable [?]"))
+                    m_mineMap.enableQuestionMark();
+            }
             if (ImGui::MenuItem("Preferences"))
             {
             }
@@ -185,9 +195,16 @@ void Minesweeper::showTimer()
     }
     m_timerIntRenderer.render(d);
     m_timerDecRenderer.render(d + 3);
-    ImGui::Image((ImTextureID)m_timerIntRenderer.tex(), ImVec2(m_timerIntRenderer.width(), m_timerIntRenderer.height()));
+
+    float aspect = float(m_timerIntRenderer.width()) / m_timerIntRenderer.height();
+    const float r = 0.3f;
+    const float maxWidth = static_cast<float>(m_timerIntRenderer.width() * 2);
+    float w = maxWidth * (1.f - std::exp(-ImGui::GetWindowSize().x * r / maxWidth));
+
+    ImGui::Image((ImTextureID)m_timerIntRenderer.tex(), ImVec2(w, w / aspect));
     ImGui::SameLine();
-    ImGui::Image((ImTextureID)m_timerDecRenderer.tex(), ImVec2(m_timerDecRenderer.width(), m_timerDecRenderer.height()));
+    w *= 0.5f;
+    ImGui::Image((ImTextureID)m_timerDecRenderer.tex(), ImVec2(w, w / aspect));
 }
 
 void Minesweeper::showRemainingMineCount()
@@ -200,8 +217,13 @@ void Minesweeper::showRemainingMineCount()
     d[2] = c % 10;
     m_mineCountRenderer.render(d);
 
-    ImGui::SameLine(ImGui::GetWindowSize().x - m_mineCountRenderer.width() - 10);
-    ImGui::Image((ImTextureID)m_mineCountRenderer.tex(), ImVec2(m_mineCountRenderer.width(), m_mineCountRenderer.height()));
+    const float r = 0.3f;
+    const float maxWidth = static_cast<float>(m_mineCountRenderer.width() * 2);
+    float w = maxWidth * (1.f - std::exp(-ImGui::GetWindowSize().x * r / maxWidth));
+    float aspect = float(m_mineCountRenderer.width()) / m_mineCountRenderer.height();
+
+    ImGui::SameLine(ImGui::GetWindowSize().x - w - 10);
+    ImGui::Image((ImTextureID)m_mineCountRenderer.tex(), ImVec2(w, w / aspect));
 }
 
 void Minesweeper::renderGui()
