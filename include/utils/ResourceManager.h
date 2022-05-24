@@ -11,11 +11,11 @@ private:
     static std::unordered_map<std::string, Texture2D> m_textures;
 
 public:
-    static void loadShaderFromFile(const std::string &filename, const std::string &name);
-    static void loadTextureFromFile(const std::string &filename, const std::string &name, GLenum filterMode = GL_LINEAR);
+    static void loadShaderFromFile(const std::string &filename, const std::string &name, bool optional = false);
+    static void loadTextureFromFile(const std::string &filename, const std::string &name, GLenum filterMode = GL_LINEAR, bool optional = false);
 
-    static Shader &getShader(const std::string &name);
-    static Texture2D &getTexture(const std::string &name);
+    static Shader *getShader(const std::string &name);
+    static Texture2D *getTexture(const std::string &name);
 
     static void cleanup();
 };

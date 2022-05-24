@@ -89,13 +89,13 @@ std::array<float, 4> MineMapRenderer::render(uint16_t viewportWidth, uint16_t vi
 
     m_VAO.bind();
 
-    Shader &shader = ResourceManager::getShader("mine_map_shader");
-    shader.use();
-    shader.setUniform4fv("view", view.data());
-    ResourceManager::getTexture("mine_map_tex").bind(0);
-    shader.setUniform1i("tex", 0);
-    shader.setUniform1i("width", static_cast<int>(mw));
-    shader.setUniform1f("opacity", PreferencesManager::preferences.mineMapOpacity);
+    Shader *shader = ResourceManager::getShader("mine_map_shader");
+    shader->use();
+    shader->setUniform4fv("view", view.data());
+    ResourceManager::getTexture("mine_map_tex")->bind(0);
+    shader->setUniform1i("tex", 0);
+    shader->setUniform1i("width", static_cast<int>(mw));
+    shader->setUniform1f("opacity", PreferencesManager::preferences.mineMapOpacity);
 
     glDrawArrays(GL_TRIANGLES, 0, 6 * mw * mh);
 

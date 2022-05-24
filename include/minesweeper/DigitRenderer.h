@@ -11,9 +11,6 @@ class DigitRenderer
 private:
     FrameBufferObject m_FBO;
 
-    Shader *m_pShader;
-    Texture2D *m_digitsTex;
-
     uint16_t m_width;
     uint16_t m_height;
 

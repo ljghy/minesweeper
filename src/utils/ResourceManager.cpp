@@ -10,11 +10,16 @@ std::unordered_map<std::string, Shader> ResourceManager::m_shaders;
 std::unordered_map<std::string, Texture2D> ResourceManager::m_textures;
 
 void ResourceManager::loadShaderFromFile(const std::string &filename,
-                                         const std::string &name)
+                                         const std::string &name,
+                                         bool optional)
 {
     std::ifstream fs(filename);
     if (!fs)
+    {
+        if (optional)
+            return;
         throw std::runtime_error("Failed to load shader from \"" + filename + "\"");
+    }
     std::string line;
     std::stringstream vss, fss;
     std::stringstream *currss = &vss;
@@ -41,7 +46,8 @@ void ResourceManager::loadShaderFromFile(const std::string &filename,
 
 void ResourceManager::loadTextureFromFile(const std::string &filename,
                                           const std::string &name,
-                                          GLenum filterMode)
+                                          GLenum filterMode,
+                                          bool optional)
 {
     Texture2DCreateInfo createInfo;
     int channels;
@@ -49,7 +55,12 @@ void ResourceManager::loadTextureFromFile(const std::string &filename,
                               &createInfo.width,
                               &createInfo.height,
                               &channels, 4);
-    assert(data != nullptr);
+    if (data == nullptr)
+    {
+        if (optional)
+            return;
+        throw std::runtime_error("Failed to load texture from \"" + filename + "\"");
+    }
 
     createInfo.internalFmt = GL_RGBA;
     createInfo.dataType = GL_UNSIGNED_BYTE;
@@ -67,18 +78,20 @@ void ResourceManager::loadTextureFromFile(const std::string &filename,
     stbi_image_free(data);
 }
 
-Shader &ResourceManager::getShader(const std::string &name)
+Shader *ResourceManager::getShader(const std::string &name)
 {
     auto ite = m_shaders.find(name);
-    assert(ite != m_shaders.end());
-    return ite->second;
+    if (ite == m_shaders.end())
+        return nullptr;
+    return &ite->second;
 }
 
-Texture2D &ResourceManager::getTexture(const std::string &name)
+Texture2D *ResourceManager::getTexture(const std::string &name)
 {
     auto ite = m_textures.find(name);
-    assert(ite != m_textures.end());
-    return ite->second;
+    if (ite == m_textures.end())
+        return nullptr;
+    return &ite->second;
 }
 
 void ResourceManager::cleanup()

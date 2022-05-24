@@ -7,23 +7,32 @@
 
 #include <algorithm>
 #include <cmath>
+
+#include <iostream>
 namespace minesweeper
 {
 Minesweeper::Minesweeper() : m_recordRank(-1) {}
 
 void Minesweeper::init(int argc, char *argv[])
 {
+    try
+    {
+        ResourceManager::loadShaderFromFile("../res/shaders/mine_map.shader", "mine_map_shader");
+        ResourceManager::loadTextureFromFile("../res/textures/mine_map_tex_blue_alpha.png", "mine_map_tex", GL_NEAREST);
 
-    ResourceManager::loadShaderFromFile("../res/shaders/mine_map.shader", "mine_map_shader");
-    ResourceManager::loadTextureFromFile("../res/textures/mine_map_tex_blue_alpha.png", "mine_map_tex", GL_NEAREST);
+        ResourceManager::loadTextureFromFile("../res/textures/background_tex.png", "background_tex", GL_LINEAR, true);
 
-    ResourceManager::loadTextureFromFile("../res/textures/background_tex.png", "background_tex");
+        ResourceManager::loadShaderFromFile("../res/shaders/digit.shader", "digit_shader");
+        ResourceManager::loadTextureFromFile("../res/textures/digits_tex.png", "digits_tex", GL_NEAREST);
 
-    ResourceManager::loadShaderFromFile("../res/shaders/digit.shader", "digit_shader");
-    ResourceManager::loadTextureFromFile("../res/textures/digits_tex.png", "digits_tex", GL_NEAREST);
-
-    ResourceManager::loadTextureFromFile("../res/textures/win_face_tex.png", "win_face_tex");
-    ResourceManager::loadTextureFromFile("../res/textures/lose_face_tex.png", "lose_face_tex");
+        ResourceManager::loadTextureFromFile("../res/textures/win_face_tex.png", "win_face_tex");
+        ResourceManager::loadTextureFromFile("../res/textures/lose_face_tex.png", "lose_face_tex");
+    }
+    catch (const std::runtime_error &e)
+    {
+        std::cerr << e.what() << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
     RecordManager::init();
     RecordManager::load();
@@ -33,9 +42,9 @@ void Minesweeper::init(int argc, char *argv[])
     ImFont *font = ImGui::GetIO().Fonts->AddFontFromFileTTF("../res/imgui_fonts/Roboto-Medium.ttf", static_cast<float>(PreferencesManager::preferences.fontSize));
 
     uint16_t h = 4 * PreferencesManager::preferences.fontSize;
-    m_timerIntRenderer.create(1.8f * h, h);
-    m_timerDecRenderer.create(0.9f * h, h / 2);
-    m_mineCountRenderer.create(1.8f * h, h);
+    m_timerIntRenderer.create(static_cast<uint16_t>(1.8f * h), h);
+    m_timerDecRenderer.create(static_cast<uint16_t>(0.9f * h), h / 2);
+    m_mineCountRenderer.create(static_cast<uint16_t>(1.8f * h), h);
     m_difficulty = PreferencesManager::preferences.difficulty;
     initGame();
 }
@@ -329,13 +338,13 @@ void Minesweeper::showFinishWindow()
 
     if (m_state == GAME_WIN)
     {
-        ImGui::Image((ImTextureID)(uintptr_t)ResourceManager::getTexture("win_face_tex").id(), ImVec2(34, 34));
+        ImGui::Image((ImTextureID)(uintptr_t)ResourceManager::getTexture("win_face_tex")->id(), ImVec2(34, 34));
         ImGui::SameLine();
         ImGui::Text("You Win!");
     }
     else
     {
-        ImGui::Image((ImTextureID)(uintptr_t)ResourceManager::getTexture("lose_face_tex").id(), ImVec2(34, 34));
+        ImGui::Image((ImTextureID)(uintptr_t)ResourceManager::getTexture("lose_face_tex")->id(), ImVec2(34, 34));
         ImGui::SameLine();
         ImGui::Text("You Lose!");
     }
@@ -415,10 +424,10 @@ void Minesweeper::showMineMap()
     m_viewportCenter = ImVec2(windowPos.x + windowSize.x * 0.5f, windowPos.y + windowSize.y * 0.5f);
 
     // background
-    if (PreferencesManager::preferences.showBackgroundImage)
+    if (PreferencesManager::preferences.showBackgroundImage && ResourceManager::getTexture("background_tex") != nullptr)
     {
-        Texture2D &background = ResourceManager::getTexture("background_tex");
-        auto tw = background.width(), th = background.height();
+        Texture2D *background = ResourceManager::getTexture("background_tex");
+        auto tw = background->width(), th = background->height();
         std::array<float, 4> v{1.f, 1.f, 0.f, 0.f};
         if (windowSize.x * th - windowSize.y * tw > 0)
         {
@@ -432,7 +441,7 @@ void Minesweeper::showMineMap()
         }
         ImVec2 uvmin(v[2], v[3]), uvmax(v[0] + v[2], v[1] + v[3]);
 
-        ImGui::GetWindowDrawList()->AddImage((ImTextureID)(uintptr_t)background.id(),
+        ImGui::GetWindowDrawList()->AddImage((ImTextureID)(uintptr_t)background->id(),
                                              windowPos, ImVec2(windowPos.x + windowSize.x, windowPos.y + windowSize.y),
                                              uvmin, uvmax);
     }
