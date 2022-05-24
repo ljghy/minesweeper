@@ -7,12 +7,13 @@ target_sources(minesweeper
 PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/glad/glad.c
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Minesweeper.cpp
-
+    
+    ${CMAKE_CURRENT_SOURCE_DIR}/minesweeper/Minesweeper.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/minesweeper/MineMap.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/minesweeper/MineMapRenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/minesweeper/DigitRenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/minesweeper/RecordManager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/minesweeper/PreferencesManager.cpp
     
     ${CMAKE_CURRENT_SOURCE_DIR}/utils/ResourceManager.cpp
 

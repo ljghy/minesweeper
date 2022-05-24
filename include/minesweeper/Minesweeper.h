@@ -5,6 +5,7 @@
 #include <minesweeper/MineMapRenderer.h>
 #include <minesweeper/DigitRenderer.h>
 #include <minesweeper/MinesweeperDefs.h>
+#include <minesweeper/PreferencesManager.h>
 #include <utils/Timer.hpp>
 #include <opengl_framework/common.h>
 namespace minesweeper
@@ -41,8 +42,11 @@ private:
         UI_EDIT_CUSTOM,
         UI_EDIT_PLAYER_ID,
         UI_SHOW_RECORDS_WINDOW,
+        UI_EDIT_PREFERENCES,
     } m_state,
         m_prevState;
+
+    Preferences m_prevPref;
 
     void initGame();
 
@@ -50,6 +54,7 @@ private:
     void showRemainingMineCount();
     void showCustomEditor();
     void showPlayerIDEditor();
+    void showPreferencesEditor();
     void showMenuBar();
     void showStatistics();
     void showRecords();

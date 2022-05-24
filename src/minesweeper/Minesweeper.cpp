@@ -1,6 +1,6 @@
 #include <imgui.h>
 
-#include <Minesweeper.h>
+#include <minesweeper/Minesweeper.h>
 
 #include <utils/ResourceManager.h>
 #include <minesweeper/RecordManager.h>
@@ -13,6 +13,7 @@ Minesweeper::Minesweeper() : m_recordRank(-1) {}
 
 void Minesweeper::init(int argc, char *argv[])
 {
+
     ResourceManager::loadShaderFromFile("../res/shaders/mine_map.shader", "mine_map_shader");
     ResourceManager::loadTextureFromFile("../res/textures/mine_map_tex_blue_alpha.png", "mine_map_tex", GL_NEAREST);
 
@@ -27,9 +28,15 @@ void Minesweeper::init(int argc, char *argv[])
     RecordManager::init();
     RecordManager::load();
 
-    m_timerIntRenderer.create(96, 60);
-    m_timerDecRenderer.create(48, 30);
-    m_mineCountRenderer.create(96, 60);
+    PreferencesManager::load();
+
+    ImFont *font = ImGui::GetIO().Fonts->AddFontFromFileTTF("../res/imgui_fonts/Roboto-Medium.ttf", static_cast<float>(PreferencesManager::preferences.fontSize));
+
+    uint16_t h = 4 * PreferencesManager::preferences.fontSize;
+    m_timerIntRenderer.create(1.8f * h, h);
+    m_timerDecRenderer.create(0.9f * h, h / 2);
+    m_mineCountRenderer.create(1.8f * h, h);
+    m_difficulty = PreferencesManager::preferences.difficulty;
     initGame();
 }
 
@@ -142,6 +149,47 @@ void Minesweeper::showPlayerIDEditor()
     ImGui::End();
 }
 
+void Minesweeper::showPreferencesEditor()
+{
+    ImGui::SetNextWindowPos(m_viewportCenter, ImGuiCond_Once, ImVec2(0.5f, 0.5f));
+    ImGui::Begin("Preferences", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
+    ImGui::SetWindowFocus("Preferences");
+
+    ImGui::Text("Style Color:");
+
+    auto &p = PreferencesManager::preferences;
+    ImGui::SameLine();
+    ImGui::RadioButton("Classic", &p.imGuiStyleColor, 0);
+    ImGui::SameLine();
+    ImGui::RadioButton("Light", &p.imGuiStyleColor, 1);
+    ImGui::SameLine();
+    ImGui::RadioButton("Dark", &p.imGuiStyleColor, 2);
+
+    ImGui::ColorEdit4("Background Color", p.backgroundColor.data(), ImGuiColorEditFlags_AlphaPreview);
+    ImGui::SliderFloat("Mine Map Opacity", &p.mineMapOpacity, 0.f, 1.f);
+
+    ImGui::Checkbox("Background Image", &p.showBackgroundImage);
+
+    static int fontSize;
+    fontSize = p.fontSize;
+    ImGui::SliderInt("Font Size(Require Restart)", &fontSize, 10, 24);
+    p.fontSize = fontSize;
+
+    ImGui::Separator();
+    if (ImGui::Button("Apply"))
+    {
+        m_state = m_prevState;
+        PreferencesManager::write();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Cancel"))
+    {
+        m_state = m_prevState;
+        PreferencesManager::preferences = m_prevPref;
+    }
+    ImGui::End();
+}
+
 void Minesweeper::showMenuBar()
 {
     if (ImGui::BeginMenuBar())
@@ -200,9 +248,14 @@ void Minesweeper::showMenuBar()
                 if (ImGui::MenuItem("Enable [?]"))
                     m_mineMap.enableQuestionMark();
             }
+
             if (ImGui::MenuItem("Preferences"))
             {
+                m_prevState = m_state;
+                m_prevPref = PreferencesManager::preferences;
+                m_state = UI_EDIT_PREFERENCES;
             }
+
             ImGui::EndMenu();
         }
         ImGui::EndMenuBar();
@@ -237,7 +290,7 @@ void Minesweeper::showRecords()
             {
                 if (i == 0 || rec.playerID == RecordManager::records[m_difficulty.difficulty][m_recordRank].playerID)
                 {
-                    ImVec4 color = i == 0 ? ImVec4(0.2f, 0.8f, 0.3f, 1.0f) : ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+                    ImVec4 color = i == 0 ? ImVec4(0.2f, 0.8f, 0.3f, 1.0f) : ImVec4(0.2f, 0.3f, 0.8f, 1.0f);
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
                     ImGui::TextColored(color, "%s", rec.playerID.data());
@@ -361,25 +414,28 @@ void Minesweeper::showMineMap()
     ImVec2 windowSize = ImGui::GetWindowSize();
     m_viewportCenter = ImVec2(windowPos.x + windowSize.x * 0.5f, windowPos.y + windowSize.y * 0.5f);
 
-    // backgroudn
-    Texture2D &background = ResourceManager::getTexture("background_tex");
-    auto tw = background.width(), th = background.height();
-    std::array<float, 4> v{1.f, 1.f, 0.f, 0.f};
-    if (windowSize.x * th - windowSize.y * tw > 0)
+    // background
+    if (PreferencesManager::preferences.showBackgroundImage)
     {
-        v[1] = windowSize.y / th * tw / windowSize.x;
-        v[3] = 0.5f * (1.f - v[1]);
-    }
-    else
-    {
-        v[0] = windowSize.x / tw * th / windowSize.y;
-        v[2] = 0.5f * (1.f - v[0]);
-    }
-    ImVec2 uvmin(v[2], v[3]), uvmax(v[0] + v[2], v[1] + v[3]);
+        Texture2D &background = ResourceManager::getTexture("background_tex");
+        auto tw = background.width(), th = background.height();
+        std::array<float, 4> v{1.f, 1.f, 0.f, 0.f};
+        if (windowSize.x * th - windowSize.y * tw > 0)
+        {
+            v[1] = windowSize.y / th * tw / windowSize.x;
+            v[3] = 0.5f * (1.f - v[1]);
+        }
+        else
+        {
+            v[0] = windowSize.x / tw * th / windowSize.y;
+            v[2] = 0.5f * (1.f - v[0]);
+        }
+        ImVec2 uvmin(v[2], v[3]), uvmax(v[0] + v[2], v[1] + v[3]);
 
-    ImGui::GetWindowDrawList()->AddImage((ImTextureID)background.id(),
-                                         windowPos, ImVec2(windowPos.x + windowSize.x, windowPos.y + windowSize.y),
-                                         uvmin, uvmax);
+        ImGui::GetWindowDrawList()->AddImage((ImTextureID)background.id(),
+                                             windowPos, ImVec2(windowPos.x + windowSize.x, windowPos.y + windowSize.y),
+                                             uvmin, uvmax);
+    }
 
     // mine map
     auto transform = m_mineMapRenderer.render(static_cast<uint16_t>(windowSize.x + 0.5f), static_cast<uint16_t>(windowSize.y + 0.5f));
@@ -393,6 +449,18 @@ void Minesweeper::showMineMap()
 
 void Minesweeper::renderGui()
 {
+    switch (PreferencesManager::preferences.imGuiStyleColor)
+    {
+    case STYLE_COLOR_CLASSIC:
+        ImGui::StyleColorsClassic();
+        break;
+    case STYLE_COLOR_LIGHT:
+        ImGui::StyleColorsLight();
+        break;
+    case STYLE_COLOR_DARK:
+        ImGui::StyleColorsDark();
+        break;
+    }
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->Pos);
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 
@@ -424,6 +492,8 @@ void Minesweeper::renderGui()
         showPlayerIDEditor();
     else if (m_state == UI_SHOW_RECORDS_WINDOW)
         showRecordsWindow();
+    else if (m_state == UI_EDIT_PREFERENCES)
+        showPreferencesEditor();
 }
 
 Operation Minesweeper::getOperation()
@@ -499,5 +569,7 @@ void Minesweeper::update()
 
 void Minesweeper::terminate()
 {
+    PreferencesManager::preferences.difficulty = m_difficulty;
+    PreferencesManager::write();
 }
 } // namespace minesweeper

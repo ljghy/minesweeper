@@ -108,10 +108,19 @@ struct GameState
     int16_t remainingMineCount;
 };
 
+enum ImGuiStyleColor
+{
+    STYLE_COLOR_CLASSIC = 0,
+    STYLE_COLOR_LIGHT = 1,
+    STYLE_COLOR_DARK = 2
+};
+
 inline const char recordFileName[] = "../res/_records";
 
 inline constexpr uint8_t recordCount = 10;
 inline constexpr uint8_t playerIDMaxLen = 32;
+
+inline const char preferencesFileName[] = "../res/_preferences";
 } // namespace minesweeper
 
 #endif

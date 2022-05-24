@@ -1,6 +1,7 @@
 #include <minesweeper/MineMapRenderer.h>
 #include <vector>
 #include <utils/ResourceManager.h>
+#include <minesweeper/PreferencesManager.h>
 
 namespace minesweeper
 {
@@ -63,7 +64,9 @@ std::array<float, 4> MineMapRenderer::render(uint16_t viewportWidth, uint16_t vi
 
     m_FBO.bind();
     glViewport(0, 0, w, h);
-    glClearColor(1.0f, 1.0f, 1.0f, 0.2f);
+
+    auto &bkColor = PreferencesManager::preferences.backgroundColor;
+    glClearColor(bkColor[0], bkColor[1], bkColor[2], bkColor[3]);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -92,6 +95,7 @@ std::array<float, 4> MineMapRenderer::render(uint16_t viewportWidth, uint16_t vi
     ResourceManager::getTexture("mine_map_tex").bind(0);
     shader.setUniform1i("tex", 0);
     shader.setUniform1i("width", static_cast<int>(mw));
+    shader.setUniform1f("opacity", PreferencesManager::preferences.mineMapOpacity);
 
     glDrawArrays(GL_TRIANGLES, 0, 6 * mw * mh);
 

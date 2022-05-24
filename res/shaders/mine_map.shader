@@ -34,8 +34,9 @@ out vec4 FragColor;
 in vec2 texCoords;
 
 uniform sampler2D tex;
-
+uniform float opacity;
 void main()
 { 
-    FragColor = texture(tex, texCoords);
+    vec4 texColor = texture(tex, texCoords);
+    FragColor = vec4(texColor.xyz, mix(texColor.w, 1.0, opacity));
 }
