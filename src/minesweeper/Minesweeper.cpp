@@ -329,13 +329,13 @@ void Minesweeper::showFinishWindow()
 
     if (m_state == GAME_WIN)
     {
-        ImGui::Image((ImTextureID)ResourceManager::getTexture("win_face_tex").id(), ImVec2(34, 34));
+        ImGui::Image((ImTextureID)(uintptr_t)ResourceManager::getTexture("win_face_tex").id(), ImVec2(34, 34));
         ImGui::SameLine();
         ImGui::Text("You Win!");
     }
     else
     {
-        ImGui::Image((ImTextureID)ResourceManager::getTexture("lose_face_tex").id(), ImVec2(34, 34));
+        ImGui::Image((ImTextureID)(uintptr_t)ResourceManager::getTexture("lose_face_tex").id(), ImVec2(34, 34));
         ImGui::SameLine();
         ImGui::Text("You Lose!");
     }
@@ -382,10 +382,10 @@ void Minesweeper::showTimer()
     const float maxWidth = m_timerIntRenderer.width() * 2.f;
     float w = maxWidth * (1.f - std::exp(-ImGui::GetWindowSize().x * r / maxWidth));
 
-    ImGui::Image((ImTextureID)m_timerIntRenderer.tex(), ImVec2(w, w / aspect));
+    ImGui::Image((ImTextureID)(uintptr_t)m_timerIntRenderer.tex(), ImVec2(w, w / aspect));
     ImGui::SameLine();
     w *= 0.5f;
-    ImGui::Image((ImTextureID)m_timerDecRenderer.tex(), ImVec2(w, w / aspect));
+    ImGui::Image((ImTextureID)(uintptr_t)m_timerDecRenderer.tex(), ImVec2(w, w / aspect));
 }
 
 void Minesweeper::showRemainingMineCount()
@@ -404,7 +404,7 @@ void Minesweeper::showRemainingMineCount()
     float aspect = float(m_mineCountRenderer.width()) / m_mineCountRenderer.height();
 
     ImGui::SameLine(ImGui::GetWindowSize().x - w - 10);
-    ImGui::Image((ImTextureID)m_mineCountRenderer.tex(), ImVec2(w, w / aspect));
+    ImGui::Image((ImTextureID)(uintptr_t)m_mineCountRenderer.tex(), ImVec2(w, w / aspect));
 }
 
 void Minesweeper::showMineMap()
@@ -432,14 +432,14 @@ void Minesweeper::showMineMap()
         }
         ImVec2 uvmin(v[2], v[3]), uvmax(v[0] + v[2], v[1] + v[3]);
 
-        ImGui::GetWindowDrawList()->AddImage((ImTextureID)background.id(),
+        ImGui::GetWindowDrawList()->AddImage((ImTextureID)(uintptr_t)background.id(),
                                              windowPos, ImVec2(windowPos.x + windowSize.x, windowPos.y + windowSize.y),
                                              uvmin, uvmax);
     }
 
     // mine map
     auto transform = m_mineMapRenderer.render(static_cast<uint16_t>(windowSize.x + 0.5f), static_cast<uint16_t>(windowSize.y + 0.5f));
-    ImGui::Image((ImTextureID)m_mineMapRenderer.tex(), windowSize, ImVec2(0, 0), ImVec2(1, 1));
+    ImGui::Image((ImTextureID)(uintptr_t)m_mineMapRenderer.tex(), windowSize, ImVec2(0, 0), ImVec2(1, 1));
 
     ImVec2 mousePos = ImGui::GetMousePos();
     m_mineMapMouseX = static_cast<int16_t>(std::floor((2.f * (mousePos.x - windowPos.x) / windowSize.x - 1.f - transform[2]) / transform[0]));
