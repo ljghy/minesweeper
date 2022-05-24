@@ -19,8 +19,10 @@ private:
 
     std::vector<std::vector<BlockInfo>> m_mineMap;        // [row(height)][col(width)]
     std::vector<std::pair<uint16_t, uint16_t>> m_minePos; //(r, c)
+
     void unhighlight();
     void boom();
+    bool isValidRowCol(int16_t r, int16_t c);
 
     bool m_questionMarkEnabled;
 

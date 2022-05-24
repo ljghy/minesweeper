@@ -1,16 +1,25 @@
 #shader vertex
 
 #version 330 core
-layout (location = 0) in vec4 aPosuv;
-layout (location = 1) in float aTexId;
 
 out vec2 texCoords;
 uniform int digit[3];
 
+const vec2 coords[] = vec2[](
+vec2(0, 0),
+vec2(1, 1),
+vec2(1, 0),
+vec2(0, 0),
+vec2(0, 1),
+vec2(1, 1)
+);
+
 void main()
 {
-    gl_Position = vec4(aPosuv.xy, 0.0, 1.0); 
-    texCoords = vec2((aPosuv.z + float(digit[int(aTexId)])) / 11.0, aPosuv.w);
+    int i = gl_VertexID / 6;
+    vec2 coord = coords[gl_VertexID % 6];
+    gl_Position = vec4((2.0 * coord.x - 1.0 + 2.0 * (i - 1.0)) / 3.0, 2.0 * coord.y - 1.0, 0.0, 1.0); 
+    texCoords = vec2((coord.x + float(digit[i])) / 11.0, coord.y);
 }
 
 #shader fragment

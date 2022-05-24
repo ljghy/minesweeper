@@ -11,8 +11,6 @@ class DigitRenderer
 private:
     FrameBufferObject m_FBO;
 
-    VertexBufferObject m_VBO;
-    VertexArrayObject m_VAO;
     Shader *m_pShader;
     Texture2D *m_digitsTex;
 

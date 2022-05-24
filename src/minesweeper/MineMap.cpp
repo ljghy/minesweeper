@@ -16,6 +16,11 @@ MineMap::MineMap()
 {
 }
 
+bool MineMap::isValidRowCol(int16_t r, int16_t c)
+{
+    return (r >= 0 && r < m_height && c >= 0 && c < m_width);
+}
+
 void MineMap::init(uint16_t width, uint16_t height, uint16_t mineCount, int16_t excludeX, int16_t excludeY, int32_t seed)
 {
     m_width = width;
@@ -35,7 +40,7 @@ void MineMap::init(uint16_t width, uint16_t height, uint16_t mineCount, int16_t 
         m_seed = static_cast<uint32_t>(seed);
     srand(m_seed);
 
-    if (excludeX >= 0 && excludeX < width && excludeY >= 0 && excludeY < height)
+    if (isValidRowCol(excludeY, excludeX))
         m_mineMap[excludeY][excludeX].isMine = true;
     mineCount = 0;
     m_minePos.clear();
@@ -50,13 +55,13 @@ void MineMap::init(uint16_t width, uint16_t height, uint16_t mineCount, int16_t 
             for (uint8_t i = 0; i < 8; ++i)
             {
                 int16_t x = r + neighborX[i], y = c + neighborY[i];
-                if (x >= 0 && x < m_height && y >= 0 && y < m_width)
+                if (isValidRowCol(x, y))
                     ++m_mineMap[x][y].neighborMineCount;
             }
             ++mineCount;
         }
     }
-    if (excludeX >= 0 && excludeX < width && excludeY >= 0 && excludeY < height)
+    if (isValidRowCol(excludeY, excludeX))
         m_mineMap[excludeY][excludeX].isMine = false;
 }
 
@@ -108,7 +113,7 @@ void MineMap::update(uint16_t row, uint16_t col, Operation oprt)
                 for (uint8_t i = 0; i < 8; ++i)
                 {
                     int16_t x = p.first + neighborX[i], y = p.second + neighborY[i];
-                    if (x >= 0 && x < m_height && y >= 0 && y < m_width && !m_mineMap[x][y].isMine && m_mineMap[x][y].isCovered())
+                    if (isValidRowCol(x, y) && !m_mineMap[x][y].isMine && m_mineMap[x][y].isCovered())
                     {
                         auto &b = m_mineMap[x][y];
                         b.state = BlockState(UNCOVERED_START + b.neighborMineCount);
@@ -129,7 +134,7 @@ void MineMap::update(uint16_t row, uint16_t col, Operation oprt)
         for (uint8_t i = 0; i < 8; ++i)
         {
             int16_t x = row + neighborX[i], y = col + neighborY[i];
-            if (x >= 0 && x < m_height && y >= 0 && y < m_width)
+            if (isValidRowCol(x, y))
             {
                 auto &b = m_mineMap[x][y];
                 if (b.isFlagged())
@@ -149,7 +154,7 @@ void MineMap::update(uint16_t row, uint16_t col, Operation oprt)
                 for (uint8_t i = 0; i < 8; ++i)
                 {
                     int16_t x = row + neighborX[i], y = col + neighborY[i];
-                    if (x >= 0 && x < m_height && y >= 0 && y < m_width)
+                    if (isValidRowCol(x, y))
                     {
                         auto &b = m_mineMap[x][y];
                         if (b.state == COVERED)
@@ -170,7 +175,7 @@ void MineMap::update(uint16_t row, uint16_t col, Operation oprt)
                     for (uint8_t i = 0; i < 8; ++i)
                     {
                         int16_t x = p.first + neighborX[i], y = p.second + neighborY[i];
-                        if (x >= 0 && x < m_height && y >= 0 && y < m_width && !m_mineMap[x][y].isMine && m_mineMap[x][y].isCovered())
+                        if (isValidRowCol(x, y) && !m_mineMap[x][y].isMine && m_mineMap[x][y].isCovered())
                         {
                             auto &b = m_mineMap[x][y];
                             b.state = BlockState(UNCOVERED_START + b.neighborMineCount);

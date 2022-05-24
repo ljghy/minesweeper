@@ -14,25 +14,21 @@ class Minesweeper
 {
 private:
     MineMap m_mineMap;
-    MineMapRenderer m_mineMapRenderer;
 
     int16_t m_mineMapMouseX;
     int16_t m_mineMapMouseY;
-
-    bool uncoverWhenRelease;
+    int16_t m_remainingMineCount;
+    ImVec2 m_viewportCenter;
+    float m_recordTime;
+    uint8_t m_recordRank;
 
     DifficultySelection m_difficulty;
-    Timer m_timer;
-    int16_t m_remainingMineCount;
 
+    Timer m_timer;
+    MineMapRenderer m_mineMapRenderer;
     DigitRenderer m_timerIntRenderer;
     DigitRenderer m_timerDecRenderer;
     DigitRenderer m_mineCountRenderer;
-
-    ImVec2 m_viewportCenter;
-
-    float m_recordTime;
-    uint8_t m_recordRank;
 
     enum
     {
@@ -42,11 +38,11 @@ private:
         GAME_LOSE,
         GAME_QUIT,
 
-        GAME_EDIT_CUSTOM,
-        GAME_EDIT_PLAYER_ID,
-
-        GAME_SHOW_RECORDS_WINDOW,
-    } m_state, m_prevState;
+        UI_EDIT_CUSTOM,
+        UI_EDIT_PLAYER_ID,
+        UI_SHOW_RECORDS_WINDOW,
+    } m_state,
+        m_prevState;
 
     void initGame();
 
@@ -59,6 +55,8 @@ private:
     void showRecords();
     void showRecordsWindow();
     void showFinishWindow();
+    void showMineMap();
+
     Operation getOperation();
 
 public:

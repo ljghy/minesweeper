@@ -16,7 +16,6 @@ void Minesweeper::init(int argc, char *argv[])
     ResourceManager::loadShaderFromFile("../res/shaders/mine_map.shader", "mine_map_shader");
     ResourceManager::loadTextureFromFile("../res/textures/mine_map_tex_blue_alpha.png", "mine_map_tex", GL_NEAREST);
 
-    ResourceManager::loadShaderFromFile("../res/shaders/background.shader", "background_shader");
     ResourceManager::loadTextureFromFile("../res/textures/background_tex.png", "background_tex");
 
     ResourceManager::loadShaderFromFile("../res/shaders/digit.shader", "digit_shader");
@@ -171,14 +170,14 @@ void Minesweeper::showMenuBar()
             }
             if (ImGui::MenuItem("Custom", NULL, m_difficulty.difficulty == CUSTOM))
             {
-                m_state = GAME_EDIT_CUSTOM;
+                m_state = UI_EDIT_CUSTOM;
             }
 
             ImGui::Separator();
             if (ImGui::MenuItem("Records"))
             {
                 m_prevState = m_state;
-                m_state = GAME_SHOW_RECORDS_WINDOW;
+                m_state = UI_SHOW_RECORDS_WINDOW;
             }
 
             ImGui::Separator();
@@ -327,7 +326,7 @@ void Minesweeper::showTimer()
 
     float aspect = float(m_timerIntRenderer.width()) / m_timerIntRenderer.height();
     const float r = 0.3f;
-    const float maxWidth = static_cast<float>(m_timerIntRenderer.width() * 2);
+    const float maxWidth = m_timerIntRenderer.width() * 2.f;
     float w = maxWidth * (1.f - std::exp(-ImGui::GetWindowSize().x * r / maxWidth));
 
     ImGui::Image((ImTextureID)m_timerIntRenderer.tex(), ImVec2(w, w / aspect));
@@ -347,12 +346,49 @@ void Minesweeper::showRemainingMineCount()
     m_mineCountRenderer.render(d);
 
     const float r = 0.3f;
-    const float maxWidth = static_cast<float>(m_mineCountRenderer.width() * 2);
+    const float maxWidth = m_mineCountRenderer.width() * 2.f;
     float w = maxWidth * (1.f - std::exp(-ImGui::GetWindowSize().x * r / maxWidth));
     float aspect = float(m_mineCountRenderer.width()) / m_mineCountRenderer.height();
 
     ImGui::SameLine(ImGui::GetWindowSize().x - w - 10);
     ImGui::Image((ImTextureID)m_mineCountRenderer.tex(), ImVec2(w, w / aspect));
+}
+
+void Minesweeper::showMineMap()
+{
+    ImGui::BeginChild("Minemap");
+    ImVec2 windowPos = ImGui::GetWindowPos();
+    ImVec2 windowSize = ImGui::GetWindowSize();
+    m_viewportCenter = ImVec2(windowPos.x + windowSize.x * 0.5f, windowPos.y + windowSize.y * 0.5f);
+
+    // backgroudn
+    Texture2D &background = ResourceManager::getTexture("background_tex");
+    auto tw = background.width(), th = background.height();
+    std::array<float, 4> v{1.f, 1.f, 0.f, 0.f};
+    if (windowSize.x * th - windowSize.y * tw > 0)
+    {
+        v[1] = windowSize.y / th * tw / windowSize.x;
+        v[3] = 0.5f * (1.f - v[1]);
+    }
+    else
+    {
+        v[0] = windowSize.x / tw * th / windowSize.y;
+        v[2] = 0.5f * (1.f - v[0]);
+    }
+    ImVec2 uvmin(v[2], v[3]), uvmax(v[0] + v[2], v[1] + v[3]);
+
+    ImGui::GetWindowDrawList()->AddImage((ImTextureID)background.id(),
+                                         windowPos, ImVec2(windowPos.x + windowSize.x, windowPos.y + windowSize.y),
+                                         uvmin, uvmax);
+
+    // mine map
+    auto transform = m_mineMapRenderer.render(static_cast<uint16_t>(windowSize.x + 0.5f), static_cast<uint16_t>(windowSize.y + 0.5f));
+    ImGui::Image((ImTextureID)m_mineMapRenderer.tex(), windowSize, ImVec2(0, 0), ImVec2(1, 1));
+
+    ImVec2 mousePos = ImGui::GetMousePos();
+    m_mineMapMouseX = static_cast<int16_t>(std::floor((2.f * (mousePos.x - windowPos.x) / windowSize.x - 1.f - transform[2]) / transform[0]));
+    m_mineMapMouseY = static_cast<int16_t>(std::floor((2.f * (mousePos.y - windowPos.y) / windowSize.y - 1.f - transform[3]) / transform[1]));
+    ImGui::EndChild();
 }
 
 void Minesweeper::renderGui()
@@ -369,43 +405,24 @@ void Minesweeper::renderGui()
                      ImGuiWindowFlags_MenuBar |
                      ImGuiWindowFlags_NoDocking);
 
-    ImVec2 windowPos = ImGui::GetWindowPos();
-    ImVec2 windowSize = ImGui::GetWindowSize();
-    m_viewportCenter = ImVec2(windowPos.x + windowSize.x * 0.5f, windowPos.y + windowSize.y * 0.5f);
-
     showMenuBar();
     showTimer();
     showRemainingMineCount();
 
     ImGui::Separator();
 
-    {
-
-        ImGui::BeginChild("Minemap");
-        windowPos = ImGui::GetWindowPos();
-        windowSize = ImGui::GetWindowSize();
-        auto transform = m_mineMapRenderer.render(static_cast<uint16_t>(windowSize.x + 0.5f), static_cast<uint16_t>(windowSize.y + 0.5f));
-        ImGui::Image(reinterpret_cast<ImTextureID>(m_mineMapRenderer.tex()), windowSize, ImVec2(0, 0), ImVec2(1, 1));
-
-        ImVec2 mousePos = ImGui::GetMousePos();
-        m_mineMapMouseX = static_cast<int16_t>(std::floor((2.f * (mousePos.x - windowPos.x) / windowSize.x - 1.f - transform[2]) / transform[0]));
-        m_mineMapMouseY = static_cast<int16_t>(std::floor((2.f * (mousePos.y - windowPos.y) / windowSize.y - 1.f - transform[3]) / transform[1]));
-        ImGui::EndChild();
-    }
+    showMineMap();
 
     ImGui::End();
     ImGui::PopStyleVar();
 
     if (m_state == GAME_WIN || m_state == GAME_LOSE)
         showFinishWindow();
-
-    if (m_state == GAME_EDIT_CUSTOM)
+    else if (m_state == UI_EDIT_CUSTOM)
         showCustomEditor();
-
-    if (m_state == GAME_EDIT_PLAYER_ID)
+    else if (m_state == UI_EDIT_PLAYER_ID)
         showPlayerIDEditor();
-
-    if (m_state == GAME_SHOW_RECORDS_WINDOW)
+    else if (m_state == UI_SHOW_RECORDS_WINDOW)
         showRecordsWindow();
 }
 
@@ -474,7 +491,7 @@ void Minesweeper::update()
             {
                 m_recordTime = m_timer.query();
                 if (RecordManager::isNewRecord(m_difficulty.difficulty, m_recordTime))
-                    m_state = GAME_EDIT_PLAYER_ID;
+                    m_state = UI_EDIT_PLAYER_ID;
             }
         }
     }
