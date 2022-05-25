@@ -36,3 +36,5 @@ PRIVATE
     OpenGL::GL
     opengl_framework
 )
+
+set_property(TARGET minesweeper PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<1:${PROJECT_SOURCE_DIR}/bin>)

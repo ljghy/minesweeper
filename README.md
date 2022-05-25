@@ -16,7 +16,7 @@ cd build
 ```
 cmake ..
 cmake --build . --config [Debug|Release]
-..\bin\[Debug|Release]\minesweeper.exe
+..\bin\minesweeper.exe
 ```
 
 #### Windows MinGW-w64
