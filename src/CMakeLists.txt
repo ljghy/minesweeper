@@ -1,7 +1,21 @@
 add_subdirectory(imgui)
 add_subdirectory(opengl_framework)
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+add_executable(minesweeper WIN32)
+else()
 add_executable(minesweeper)
+endif()
+
+set_property(TARGET minesweeper PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<1:${PROJECT_SOURCE_DIR}/bin>)
+
+if (MSVC)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT minesweeper)
+endif (MSVC)
+
+if ((CMAKE_SYSTEM_NAME MATCHES "Windows") AND ((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")))
+target_link_options(minesweeper PRIVATE -mwindows)
+endif()
 
 target_sources(minesweeper
 PRIVATE
@@ -36,5 +50,3 @@ PRIVATE
     OpenGL::GL
     opengl_framework
 )
-
-set_property(TARGET minesweeper PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<1:${PROJECT_SOURCE_DIR}/bin>)
