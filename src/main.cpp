@@ -77,6 +77,7 @@ int main(int argc, char **argv)
 // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
 // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
+    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GL_TRUE);
 
     // Create window with graphics context
     GLFWwindow *window = glfwCreateWindow(1280, 720, "Minesweeper", NULL, NULL);
@@ -136,7 +137,7 @@ int main(int argc, char **argv)
 
         io.IniFilename = nullptr;
         // Our state
-        ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+        ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
         minesweeper::Minesweeper game;
         game.init(argc, argv);
 

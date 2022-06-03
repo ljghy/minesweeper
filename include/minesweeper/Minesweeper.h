@@ -36,6 +36,7 @@ private:
         GAME_IDLE,
         GAME_PLAYING,
         GAME_WIN,
+        GAME_WIN_NEW_RECORD,
         GAME_LOSE,
         GAME_QUIT,
 
@@ -56,10 +57,11 @@ private:
     void showPlayerIDEditor();
     void showPreferencesEditor();
     void showMenuBar();
-    void showStatistics();
+    void showStatistics(int col);
     void showRecords();
     void showRecordsWindow();
     void showFinishWindow();
+    void showFinishWindowWithRecords();
     void showMineMap();
 
     Operation getOperation();

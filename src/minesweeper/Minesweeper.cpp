@@ -152,7 +152,7 @@ void Minesweeper::showPlayerIDEditor()
     {
         m_recordRank = RecordManager::insertRecord(buffer, m_difficulty.difficulty, m_recordTime);
         RecordManager::write();
-        m_state = GAME_WIN;
+        m_state = GAME_WIN_NEW_RECORD;
     }
 
     ImGui::End();
@@ -271,9 +271,9 @@ void Minesweeper::showMenuBar()
     }
 }
 
-void Minesweeper::showStatistics()
+void Minesweeper::showStatistics(int col)
 {
-    if (ImGui::BeginTable("Statistics", 3))
+    if (ImGui::BeginTable("Statistics", col))
     {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
@@ -333,8 +333,8 @@ void Minesweeper::showRecords()
 void Minesweeper::showFinishWindow()
 {
     ImGui::SetNextWindowPos(m_viewportCenter, ImGuiCond_Once, ImVec2(0.5f, 0.5f));
-    ImGui::Begin("Minesweeper", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
-    ImGui::SetWindowFocus("Minesweeper");
+    ImGui::Begin("Minesweeper##Finish", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
+    ImGui::SetWindowFocus("Minesweeper##Finish");
 
     if (m_state == GAME_WIN)
     {
@@ -351,7 +351,31 @@ void Minesweeper::showFinishWindow()
 
     ImGui::Separator();
 
-    showStatistics();
+    showStatistics(2);
+
+    if (ImGui::Button("New game"))
+        initGame();
+
+    ImGui::SameLine();
+    if (ImGui::Button("Quit"))
+        m_state = GAME_QUIT;
+
+    ImGui::End();
+}
+
+void Minesweeper::showFinishWindowWithRecords()
+{
+    ImGui::SetNextWindowPos(m_viewportCenter, ImGuiCond_Once, ImVec2(0.5f, 0.5f));
+    ImGui::Begin("Minesweeper##Records", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
+    ImGui::SetWindowFocus("Minesweeper##Records");
+
+    ImGui::Image((ImTextureID)(uintptr_t)ResourceManager::getTexture("win_face_tex")->id(), ImVec2(34, 34));
+    ImGui::SameLine();
+    ImGui::Text("You Win!");
+
+    ImGui::Separator();
+
+    showStatistics(3);
 
     showRecords();
 
@@ -495,6 +519,8 @@ void Minesweeper::renderGui()
 
     if (m_state == GAME_WIN || m_state == GAME_LOSE)
         showFinishWindow();
+    else if (m_state == GAME_WIN_NEW_RECORD)
+        showFinishWindowWithRecords();
     else if (m_state == UI_EDIT_CUSTOM)
         showCustomEditor();
     else if (m_state == UI_EDIT_PLAYER_ID)
