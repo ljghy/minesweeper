@@ -22,6 +22,8 @@ private:
     uint16_t m_viewportHeight;
     std::array<float, 4> m_mineMapTransform;
 
+    std::vector<float> m_texId;
+
 public:
     MineMapRenderer();
     void create(MineMap &mineMap);

@@ -21,11 +21,8 @@ void MineMapRenderer::create(MineMap &mineMap)
         m_mineMapWidth = w;
         m_mineMapHeight = h;
 
-        std::vector<float> VBOData;
-
         uint16_t vertCount = 6 * w * h;
-        VBOData.resize(vertCount);
-        m_VBO.create(VBOData.data(), vertCount * sizeof(float), GL_DYNAMIC_DRAW);
+        m_VBO.create(nullptr, vertCount * sizeof(float), GL_DYNAMIC_DRAW);
         m_VAO.create();
         VertexBufferLayout layout;
         layout.push(GL_FLOAT, 1);
@@ -36,20 +33,20 @@ void MineMapRenderer::create(MineMap &mineMap)
 std::array<float, 4> MineMapRenderer::render(uint16_t viewportWidth, uint16_t viewportHeight)
 {
     uint16_t mw = m_pMineMap->getWidth(), mh = m_pMineMap->getHeight();
-    m_VBO.bind();
-    void *ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
+    uint16_t vertCount = 6 * mw * mh;
+    m_texId.resize(vertCount);
     for (uint16_t r = 0; r < mh; ++r)
         for (uint16_t c = 0; c < mw; ++c)
         {
             auto info = m_pMineMap->getBlockInfo(r, c);
             uint16_t idx = 6 * (r * mw + c);
+            float texId = static_cast<float>(info.state == COVERED && info.isHighlighted ? 3 : info.state);
             for (uint16_t i = idx; i < idx + 6; ++i)
-            {
-                *((float *)ptr + i) = static_cast<float>(info.state == COVERED && info.isHighlighted ? 3 : info.state);
-            }
+                m_texId[i] = texId;
         }
-    glUnmapBuffer(GL_ARRAY_BUFFER);
+    m_VBO.bind();
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * vertCount, m_texId.data());
 
     if (m_viewportWidth != viewportWidth || m_viewportHeight != viewportHeight)
     {
