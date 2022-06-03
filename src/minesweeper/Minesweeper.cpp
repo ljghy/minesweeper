@@ -64,10 +64,10 @@ void Minesweeper::showCustomEditor()
     ImGui::Begin("Custom Editor", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
     ImGui::SetWindowFocus("Custom Editor");
 
-    static int customWidth = 8, customHeight = 8, customMineCount = 10;
+    static int customWidth = 9, customHeight = 9, customMineCount = 10;
 
-    ImGui::SliderInt("width", &customWidth, 8, 30);
-    ImGui::SliderInt("height", &customHeight, 8, 30);
+    ImGui::SliderInt("width", &customWidth, 9, 30);
+    ImGui::SliderInt("height", &customHeight, 9, 30);
     ImGui::SliderInt("mines", &customMineCount, 1, customWidth * customHeight / 2);
 
     ImGui::Separator();
@@ -174,7 +174,7 @@ void Minesweeper::showPreferencesEditor()
     ImGui::SameLine();
     ImGui::RadioButton("Dark", &p.imGuiStyleColor, 2);
 
-    ImGui::ColorEdit4("Background Color", p.backgroundColor.data(), ImGuiColorEditFlags_AlphaPreview);
+    ImGui::ColorEdit4("Background Color", p.backgroundColor.data());
     ImGui::SliderFloat("Mine Map Opacity", &p.mineMapOpacity, 0.f, 1.f);
 
     ImGui::Checkbox("Background Image", &p.showBackgroundImage);

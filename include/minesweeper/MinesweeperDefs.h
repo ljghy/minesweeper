@@ -32,8 +32,8 @@ struct DifficultySelection
         switch (d)
         {
         case EASY:
-            width = 8;
-            height = 8;
+            width = 9;
+            height = 9;
             mineCount = 10;
             break;
         case NORMAL:
