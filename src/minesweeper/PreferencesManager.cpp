@@ -1,4 +1,4 @@
-#include <minesweeper/PreferencesManager.h>
+#include "PreferencesManager.h"
 #include <fstream>
 
 namespace minesweeper

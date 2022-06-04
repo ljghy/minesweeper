@@ -1,4 +1,4 @@
-#include <minesweeper/RecordManager.h>
+#include "RecordManager.h"
 #include <fstream>
 #include <algorithm>
 #include <cassert>

@@ -1,5 +1,5 @@
-#include <minesweeper/DigitRenderer.h>
-#include <utils/ResourceManager.h>
+#include "DigitRenderer.h"
+#include "ResourceManager.h"
 
 namespace minesweeper
 {

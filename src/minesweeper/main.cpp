@@ -15,8 +15,8 @@
 #endif
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
 
-#include <minesweeper/Minesweeper.h>
-#include <utils/ResourceManager.h>
+#include "Minesweeper.h"
+#include "ResourceManager.h"
 
 #include <stb/stb_image.h>
 

@@ -1,13 +1,13 @@
 #ifndef MINESWEEPER_H_
 #define MINESWEEPER_H_
 
-#include <minesweeper/MineMap.h>
-#include <minesweeper/MineMapRenderer.h>
-#include <minesweeper/DigitRenderer.h>
-#include <minesweeper/MinesweeperDefs.h>
-#include <minesweeper/PreferencesManager.h>
-#include <utils/Timer.hpp>
-#include <opengl_framework/common.h>
+#include "MineMap.h"
+#include "MineMapRenderer.h"
+#include "DigitRenderer.h"
+#include "MinesweeperDefs.h"
+#include "PreferencesManager.h"
+#include "Timer.hpp"
+
 namespace minesweeper
 {
 

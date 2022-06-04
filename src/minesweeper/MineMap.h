@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include <vector>
-#include <minesweeper/MinesweeperDefs.h>
+#include "MinesweeperDefs.h"
 
 namespace minesweeper
 {

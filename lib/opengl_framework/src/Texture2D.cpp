@@ -1,4 +1,3 @@
-#include <glad/glad.h>
 #include <opengl_framework/Texture2D.h>
 
 Texture2D::Texture2D() : m_id(0) {}

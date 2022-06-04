@@ -1,7 +1,7 @@
 #ifndef PREFERENCES_MANAGER_H_
 #define PREFERENCES_MANAGER_H_
 
-#include <minesweeper/MinesweeperDefs.h>
+#include "MinesweeperDefs.h"
 #include <array>
 
 namespace minesweeper

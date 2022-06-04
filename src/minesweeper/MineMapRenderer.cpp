@@ -1,7 +1,7 @@
-#include <minesweeper/MineMapRenderer.h>
+#include "MineMapRenderer.h"
+#include "ResourceManager.h"
+#include "PreferencesManager.h"
 #include <vector>
-#include <utils/ResourceManager.h>
-#include <minesweeper/PreferencesManager.h>
 
 namespace minesweeper
 {

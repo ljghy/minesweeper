@@ -1,4 +1,4 @@
-#include <minesweeper/MineMap.h>
+#include "MineMap.h"
 
 #include <cassert>
 #include <cstdlib>

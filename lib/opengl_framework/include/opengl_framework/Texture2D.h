@@ -1,5 +1,7 @@
 #ifndef TEXTURE_2D_H_
 #define TEXTURE_2D_H_
+
+#include <glad/glad.h>
 #include <string>
 
 struct Texture2DCreateInfo

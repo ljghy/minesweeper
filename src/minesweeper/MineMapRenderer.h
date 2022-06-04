@@ -1,8 +1,10 @@
 #ifndef MINE_MAP_RENDERER_H_
 #define MINE_MAP_RENDERER_H_
 
-#include <minesweeper/MineMap.h>
-#include <opengl_framework/common.h>
+#include "MineMap.h"
+#include <opengl_framework/FrameBufferObject.h>
+#include <opengl_framework/VertexBufferObject.h>
+#include <opengl_framework/VertexArrayObject.h>
 #include <array>
 
 namespace minesweeper

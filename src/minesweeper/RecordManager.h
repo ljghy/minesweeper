@@ -3,7 +3,7 @@
 
 #include <array>
 #include <string>
-#include <minesweeper/MinesweeperDefs.h>
+#include "MinesweeperDefs.h"
 namespace minesweeper
 {
 struct Record

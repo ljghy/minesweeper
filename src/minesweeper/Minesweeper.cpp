@@ -1,12 +1,12 @@
 #include <imgui.h>
 
-#include <minesweeper/Minesweeper.h>
-
-#include <utils/ResourceManager.h>
-#include <minesweeper/RecordManager.h>
+#include "Minesweeper.h"
+#include "ResourceManager.h"
+#include "RecordManager.h"
 
 #include <algorithm>
 #include <cmath>
+#include <stdexcept>
 
 #include <iostream>
 namespace minesweeper

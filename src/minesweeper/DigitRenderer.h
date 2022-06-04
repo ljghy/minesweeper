@@ -1,7 +1,7 @@
 #ifndef DIGIT_RENDERER_H_
 #define DIGIT_RENDERER_H_
 
-#include <opengl_framework/common.h>
+#include <opengl_framework/FrameBufferObject.h>
 #include <vector>
 
 namespace minesweeper

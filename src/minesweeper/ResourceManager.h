@@ -3,7 +3,8 @@
 
 #include <unordered_map>
 #include <string>
-#include <opengl_framework/common.h>
+#include <opengl_framework/Shader.h>
+#include <opengl_framework/Texture2D.h>
 class ResourceManager
 {
 private:
