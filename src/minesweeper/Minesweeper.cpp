@@ -11,9 +11,9 @@
 #include <iostream>
 namespace minesweeper
 {
-Minesweeper::Minesweeper() : m_recordRank(-1) {}
+Minesweeper::Minesweeper() {}
 
-void Minesweeper::init(int argc, char *argv[])
+void Minesweeper::init()
 {
     try
     {
@@ -64,11 +64,15 @@ void Minesweeper::showCustomEditor()
     ImGui::Begin("Custom Editor", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
     ImGui::SetWindowFocus("Custom Editor");
 
-    static int customWidth = 9, customHeight = 9, customMineCount = 10;
+    static int customWidth = m_difficulty.width,
+               customHeight = m_difficulty.height,
+               customMineCount = m_difficulty.mineCount;
 
     ImGui::SliderInt("width", &customWidth, 9, 30);
     ImGui::SliderInt("height", &customHeight, 9, 30);
     ImGui::SliderInt("mines", &customMineCount, 1, customWidth * customHeight / 2);
+
+    customMineCount = std::clamp(customMineCount, 1, customWidth * customHeight / 2);
 
     ImGui::Separator();
     if (ImGui::Button("Apply"))
@@ -425,9 +429,9 @@ void Minesweeper::showRemainingMineCount()
 {
     int c = m_remainingMineCount;
     int d[3];
-    d[0] = c < 0 ? 10 : 0;
-    c = std::min(std::abs(c), 99);
-    d[1] = c / 10;
+    d[0] = c < 0 ? 10 : c / 100;
+    c = std::min(std::abs(c), c < 0 ? 99 : 999);
+    d[1] = c % 100 / 10;
     d[2] = c % 10;
     m_mineCountRenderer.render(d);
 

@@ -68,7 +68,7 @@ private:
 
 public:
     Minesweeper();
-    void init(int argc, char *argv[]);
+    void init();
     void update();
     void renderGui();
     bool shouldQuit() const { return m_state == GAME_QUIT; }
