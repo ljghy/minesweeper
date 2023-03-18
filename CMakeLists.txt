@@ -10,5 +10,9 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
 add_subdirectory(lib)
 add_subdirectory(src)
