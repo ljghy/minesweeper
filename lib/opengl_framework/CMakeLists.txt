@@ -10,10 +10,11 @@ PRIVATE
 )
 
 target_include_directories(opengl_framework
-PRIVATE 
-    ${PROJECT_SOURCE_DIR}/lib/glad/include
-    ${PROJECT_SOURCE_DIR}/lib/glfw/include
-    ${PROJECT_SOURCE_DIR}/lib/opengl_framework/include
-INTERFACE
+PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+target_link_libraries(opengl_framework
+PUBLIC
+    glad
 )

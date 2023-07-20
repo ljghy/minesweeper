@@ -11,10 +11,11 @@ PRIVATE
 )
 
 target_include_directories(imgui
-PRIVATE 
-    ${PROJECT_SOURCE_DIR}/lib/glad/include
-    ${PROJECT_SOURCE_DIR}/lib/glfw/include
-    ${PROJECT_SOURCE_DIR}/lib/imgui/include
-INTERFACE
+PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+target_link_libraries(imgui
+PUBLIC
+    glad
 )

@@ -28,15 +28,6 @@ PRIVATE
 
 )
 
-target_include_directories(minesweeper
-PRIVATE 
-    ${PROJECT_SOURCE_DIR}/lib/glad/include
-    ${PROJECT_SOURCE_DIR}/lib/glfw/include
-    ${PROJECT_SOURCE_DIR}/lib/imgui/include
-    ${PROJECT_SOURCE_DIR}/lib/opengl_framework/include
-    ${PROJECT_SOURCE_DIR}/lib/stb/include
-)
-
 find_package(OpenGL REQUIRED)
 
 target_link_libraries(minesweeper
@@ -46,4 +37,5 @@ PRIVATE
     imgui
     OpenGL::GL
     opengl_framework
+    stb_image
 )
